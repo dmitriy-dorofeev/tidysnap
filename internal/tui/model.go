@@ -27,12 +27,18 @@ const (
 	screenResetConfirm
 )
 
+const (
+	minWidth  = 80
+	minHeight = 24
+)
+
 type model struct {
-	width  int
-	height int
-	screen screen
-	cfg    *config.Config
-	err    error
+	width    int
+	height   int
+	screen   screen
+	cfg      *config.Config
+	err      error
+	tooSmall bool
 
 	spinner spinner.Model
 
@@ -93,8 +99,7 @@ type saveAndGoToStatusMsg struct {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
+		m.resize(msg.Width, msg.Height)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -154,6 +159,10 @@ func (m model) View() string {
 		return fmt.Sprintf(i18n.T("error_screen"), m.err)
 	}
 
+	if m.tooSmall {
+		return m.tooSmallView()
+	}
+
 	switch m.screen {
 	case screenWelcome:
 		return m.welcomeView()
@@ -174,6 +183,57 @@ func (m model) View() string {
 	}
 
 	return i18n.T("loading")
+}
+
+func (m *model) resize(width, height int) {
+	m.width = width
+	m.height = height
+	m.tooSmall = width < minWidth || height < minHeight
+
+	m.welcomeModel.width = width
+	m.welcomeModel.height = height
+
+	m.folderPickerModel.width = width
+	m.folderPickerModel.height = height
+
+	m.statusModel.width = width
+	m.statusModel.height = height
+
+	listW := width - 4
+	if listW < 0 {
+		listW = 0
+	}
+	listH := height - 8
+	if listH < 0 {
+		listH = 0
+	}
+	if m.previewModel.initialized {
+		m.previewModel.list.SetSize(listW, listH)
+	}
+
+	vpH := height - 2
+	if vpH < 0 {
+		vpH = 0
+	}
+	m.logViewModel.viewport.Width = width
+	m.logViewModel.viewport.Height = vpH
+
+	if m.setupModel.form != nil {
+		m.setupModel.form = m.setupModel.form.WithWidth(width).WithHeight(height)
+	}
+}
+
+func (m model) tooSmallView() string {
+	style := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("196")).
+		Align(lipgloss.Center)
+
+	msg := fmt.Sprintf(i18n.T("terminal_too_small"), minWidth, minHeight)
+	return lipgloss.Place(m.width, m.height,
+		lipgloss.Center, lipgloss.Center,
+		style.Render(msg),
+	)
 }
 
 func containsSystemDir(path string) bool {

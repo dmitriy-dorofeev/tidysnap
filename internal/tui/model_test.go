@@ -3,6 +3,7 @@ package tui
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -64,6 +65,45 @@ func TestUpdate_WindowSize(t *testing.T) {
 	}
 	if cmd != nil {
 		t.Error("WindowSize should not return a command")
+	}
+}
+
+func TestUpdate_WindowSize_TooSmall(t *testing.T) {
+	m := InitialModel()
+	newM, _ := m.Update(tea.WindowSizeMsg{Width: 79, Height: 24})
+	mm := newM.(model)
+	if !mm.tooSmall {
+		t.Error("expected tooSmall to be true for width < minWidth")
+	}
+
+	m = InitialModel()
+	newM, _ = m.Update(tea.WindowSizeMsg{Width: 80, Height: 23})
+	mm = newM.(model)
+	if !mm.tooSmall {
+		t.Error("expected tooSmall to be true for height < minHeight")
+	}
+}
+
+func TestUpdate_WindowSize_Adequate(t *testing.T) {
+	m := InitialModel()
+	newM, _ := m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	mm := newM.(model)
+	if mm.tooSmall {
+		t.Error("expected tooSmall to be false for exact minimum size")
+	}
+}
+
+func TestView_TooSmall(t *testing.T) {
+	m := InitialModel()
+	m.tooSmall = true
+	m.width = 40
+	m.height = 10
+	view := m.View()
+	if view == "" {
+		t.Error("View should not be empty when tooSmall is set")
+	}
+	if !strings.Contains(view, "80") || !strings.Contains(view, "24") {
+		t.Error("tooSmall view should mention minimum dimensions")
 	}
 }
 

@@ -149,7 +149,7 @@ type daemonStatusMsg struct {
 
 func (m model) statusView() string {
 	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86")).MarginBottom(1)
-	boxStyle := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("86")).Padding(1, 2).Width(70)
+	boxStyle := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("86")).Padding(1, 1).Width(m.statusModel.width - 4)
 	labelStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("250"))
 	valueStyle := lipgloss.NewStyle().Bold(true)
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1)
@@ -178,7 +178,7 @@ func (m model) statusView() string {
 	}
 
 	if status.hasNextRun {
-		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_next_run")), valueStyle.Render(status.nextRun.Format("02.01.2006 15:04"))))
+		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_next_run")), valueStyle.Render(status.nextRun.Format("02.01 15:04"))))
 	}
 
 	if m.statusModel.msg != "" {

@@ -32,9 +32,10 @@ func (i previewItem) Description() string {
 func (i previewItem) FilterValue() string { return i.file.Path }
 
 type previewModel struct {
-	list   list.Model
-	files  []scanner.ScanResult
-	dryRun bool
+	list        list.Model
+	files       []scanner.ScanResult
+	dryRun      bool
+	initialized bool
 }
 
 func newPreviewModel(width, height int, files []scanner.ScanResult, dryRun bool) previewModel {
@@ -49,7 +50,7 @@ func newPreviewModel(width, height int, files []scanner.ScanResult, dryRun bool)
 	l.SetFilteringEnabled(false)
 	l.KeyMap.Quit = key.NewBinding(key.WithKeys("esc", "q"))
 
-	return previewModel{list: l, files: files, dryRun: dryRun}
+	return previewModel{list: l, files: files, dryRun: dryRun, initialized: true}
 }
 
 func (m previewModel) Init() tea.Cmd { return nil }
