@@ -8,7 +8,7 @@ import (
 func DefaultConfig() *Config {
 	home, _ := os.UserHomeDir()
 	return &Config{
-		TargetDir:          filepath.Join(home, "Desktop"),
+		TargetDir:          home,
 		Extensions:         []string{".png", ".jpg", ".jpeg", ".mov", ".mp4", ".gif"},
 		RetentionDays:      30,
 		DryRun:             true,
