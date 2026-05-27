@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 )
@@ -88,4 +89,17 @@ func BinaryPath() string {
 		return filepath.Join("/usr/local/bin", "tidysnap")
 	}
 	return ex
+}
+
+func NextRunTime(intervalHours int) (time.Time, bool) {
+	if !IsInstalled() || !IsLoaded() {
+		return time.Time{}, false
+	}
+	logPath := config.LogPath()
+	info, err := os.Stat(logPath)
+	if err != nil {
+		return time.Time{}, false
+	}
+	nextRun := info.ModTime().Add(time.Duration(intervalHours) * time.Hour)
+	return nextRun, true
 }

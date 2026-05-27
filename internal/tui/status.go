@@ -115,6 +115,10 @@ func (m model) statusView() string {
 		fmt.Sprintf("%s %s", labelStyle.Render("Демон:"), valueStyle.Render(status)),
 	}
 
+	if nextRun, ok := daemon.NextRunTime(m.cfg.CheckIntervalHours); ok {
+		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render("Следующий запуск:"), valueStyle.Render(nextRun.Format("02.01.2006 15:04"))))
+	}
+
 	if m.statusModel.msg != "" {
 		lines = append(lines, "", msgStyle.Render(m.statusModel.msg))
 	}
