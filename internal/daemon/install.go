@@ -45,22 +45,21 @@ func IsInstalled() bool {
 }
 
 func IsLoaded() bool {
-	out, err := exec.Command("launchctl", "list", label).Output()
-	if err != nil {
-		return false
-	}
-	fields := strings.Fields(string(out))
-	return len(fields) >= 3 && fields[2] == label
+	_, err := exec.Command("launchctl", "list", label).Output()
+	return err == nil
 }
 
 func IsRunning() bool {
-	out, err := exec.Command("launchctl", "list", label).Output()
+	out, err := exec.Command("launchctl", "list").Output()
 	if err != nil {
 		return false
 	}
-	fields := strings.Fields(string(out))
-	if len(fields) >= 3 && fields[2] == label {
-		return fields[0] != "-" && fields[0] != ""
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) >= 3 && fields[2] == label {
+			return fields[0] != "-" && fields[0] != ""
+		}
 	}
 	return false
 }
