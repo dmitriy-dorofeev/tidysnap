@@ -22,26 +22,25 @@ func newSetupModel(width, height int, cfg *config.Config) setupModel {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Папка для очистки").
-				Description("Укажите путь к папке со скриншотами").
-				Value(&cfg.TargetDir),
-
-			huh.NewInput().
+				Key("extensions").
 				Title("Расширения файлов").
 				Description("Через запятую, например: .png, .mov, .mp4").
 				Value(&extStr),
 
 			huh.NewInput().
+				Key("retention").
 				Title("Срок хранения (дней)").
 				Description("Файлы старше этого срока будут удалены").
 				Value(&retentionStr),
 
 			huh.NewInput().
+				Key("interval").
 				Title("Интервал проверки (часов)").
 				Description("Как часто запускать очистку в фоне").
 				Value(&intervalStr),
 
 			huh.NewConfirm().
+				Key("dryrun").
 				Title("Тестовый режим (Dry Run)").
 				Description("Показывать файлы, но не удалять их").
 				Value(&cfg.DryRun),
@@ -63,21 +62,21 @@ func (m model) updateSetup(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.setupModel.form.State == huh.StateCompleted {
 		// Parse extensions
-		extStr := m.setupModel.form.GetString("Расширения файлов")
+		extStr := m.setupModel.form.GetString("extensions")
 		if extStr == "" {
 			extStr = ".png, .mov, .mp4, .gif"
 		}
 		m.cfg.Extensions = parseExtensions(extStr)
 
 		// Parse retention
-		retStr := m.setupModel.form.GetString("Срок хранения (дней)")
+		retStr := m.setupModel.form.GetString("retention")
 		if retStr == "" {
 			retStr = "30"
 		}
 		m.cfg.RetentionDays = parseInt(retStr, 30)
 
 		// Parse interval
-		intStr := m.setupModel.form.GetString("Интервал проверки (часов)")
+		intStr := m.setupModel.form.GetString("interval")
 		if intStr == "" {
 			intStr = "24"
 		}

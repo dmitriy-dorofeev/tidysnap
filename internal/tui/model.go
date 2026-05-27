@@ -16,6 +16,7 @@ type screen int
 
 const (
 	screenWelcome screen = iota
+	screenFolderPicker
 	screenSetup
 	screenWarning
 	screenStatus
@@ -33,12 +34,13 @@ type model struct {
 	spinner spinner.Model
 
 	// Sub-models
-	welcomeModel welcomeModel
-	setupModel   setupModel
-	warningModel warningModel
-	statusModel  statusModel
-	previewModel previewModel
-	logViewModel logViewModel
+	welcomeModel      welcomeModel
+	folderPickerModel folderPickerModel
+	setupModel        setupModel
+	warningModel      warningModel
+	statusModel       statusModel
+	previewModel      previewModel
+	logViewModel      logViewModel
 }
 
 func InitialModel() model {
@@ -111,6 +113,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.screen {
 	case screenWelcome:
 		return m.updateWelcome(msg)
+	case screenFolderPicker:
+		return m.updateFolderPicker(msg)
 	case screenSetup:
 		return m.updateSetup(msg)
 	case screenWarning:
@@ -134,6 +138,8 @@ func (m model) View() string {
 	switch m.screen {
 	case screenWelcome:
 		return m.welcomeView()
+	case screenFolderPicker:
+		return m.folderPickerView()
 	case screenSetup:
 		return m.setupView()
 	case screenWarning:

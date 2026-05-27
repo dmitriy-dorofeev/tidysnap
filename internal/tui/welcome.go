@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -23,9 +24,14 @@ func (m model) updateWelcome(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter", "s":
-			m.screen = screenSetup
-			m.setupModel = newSetupModel(m.width, m.height, m.cfg)
-			return m, m.setupModel.Init()
+			m.screen = screenFolderPicker
+			startDir := m.cfg.TargetDir
+			if startDir == "" {
+				home, _ := os.UserHomeDir()
+				startDir = home
+			}
+			m.folderPickerModel = newFolderPickerModel(m.width, m.height, startDir)
+			return m, m.folderPickerModel.Init()
 		case "q", "esc":
 			return m, tea.Quit
 		}
