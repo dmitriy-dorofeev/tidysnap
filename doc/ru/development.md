@@ -16,12 +16,14 @@
 ## Команды Makefile
 
 ```bash
-make build      # Собрать бинарник в bin/tidysnap
-make run        # Запустить через go run
-make install    # Собрать и скопировать в /usr/local/bin
-make uninstall  # Удалить бинарник, plist и конфиг
-make clean      # Удалить папку bin/
-make test       # Запустить все тесты
+make build         # Собрать бинарник в bin/tidysnap
+make run           # Запустить через go run
+make install       # Собрать и скопировать в /usr/local/bin
+make uninstall     # Удалить бинарник, plist и конфиг
+make clean         # Удалить папку bin/
+make test          # Запустить все тесты
+make check         # Проверить форматирование, vet, staticcheck, govulncheck и gosec
+make install-tools # Установить инструменты для линтинга и безопасности
 ```
 
 ## Тестирование

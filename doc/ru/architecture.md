@@ -30,6 +30,7 @@ tidysnap/
 │   │   └── plist.go             # GeneratePlist, WritePlist, RemovePlist
 │   └── tui/
 │       ├── model.go             # Главная модель Bubble Tea, экраны, сообщения
+│       ├── keys.go              # Нормализация раскладки клавиатуры (QWERTY / ЙЦУКЕН)
 │       ├── welcome.go           # Экран приветствия
 │       ├── folderpicker.go      # Выбор папки через file picker
 │       ├── setup.go             # Форма настроек (huh)

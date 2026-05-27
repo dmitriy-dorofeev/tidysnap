@@ -65,7 +65,7 @@ func (m model) updateSetup(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Parse extensions
 		extStr := m.setupModel.form.GetString("extensions")
 		if extStr == "" {
-			extStr = ".png, .mov, .mp4, .gif"
+			extStr = ".png, .jpg, .jpeg, .mov, .mp4, .gif"
 		}
 		m.cfg.Extensions = parseExtensions(extStr)
 
