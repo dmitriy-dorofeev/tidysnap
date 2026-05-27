@@ -2,80 +2,200 @@ package tui
 
 import (
 	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 
-	"github.com/charmbracelet/bubbles/filepicker"
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
+type dirItem struct {
+	name     string
+	path     string
+	isParent bool
+}
+
 type folderPickerModel struct {
 	width  int
 	height int
-	picker filepicker.Model
+	cwd    string
+	items  []dirItem
+	cursor int
 }
 
-func newFolderPickerModel(width, height int, startDir string) folderPickerModel {
-	fp := filepicker.New()
-	fp.DirAllowed = true
-	fp.FileAllowed = false
-	fp.ShowHidden = false
-	fp.AutoHeight = false
-	fp.SetHeight(height - 8)
-	fp.KeyMap.Select = key.NewBinding(key.WithKeys(" "), key.WithHelp("space", "select"))
-	fp.KeyMap.Open = key.NewBinding(key.WithKeys("l", "right", "enter"), key.WithHelp("l", "open"))
+type folderPickerLoadedMsg struct {
+	items []dirItem
+}
 
+type folderPickerErrorMsg struct {
+	err error
+}
+
+type folderSelectedMsg struct {
+	path string
+}
+
+type folderPickerBackMsg struct{}
+
+func newFolderPickerModel(width, height int, startDir string) folderPickerModel {
 	if startDir == "" {
 		home, _ := os.UserHomeDir()
 		startDir = home
 	}
-	fp.CurrentDirectory = startDir
-
 	return folderPickerModel{
-		width:  width,
+		width: width,
 		height: height,
-		picker: fp,
+		cwd:    startDir,
+		items:  nil,
+		cursor: 0,
 	}
 }
 
 func (m folderPickerModel) Init() tea.Cmd {
-	return m.picker.Init()
+	return m.load()
+}
+
+func (m folderPickerModel) load() tea.Cmd {
+	return func() tea.Msg {
+		entries, err := os.ReadDir(m.cwd)
+		if err != nil {
+			return folderPickerErrorMsg{err}
+		}
+
+		sort.Slice(entries, func(i, j int) bool {
+			return strings.ToLower(entries[i].Name()) < strings.ToLower(entries[j].Name())
+		})
+
+		var items []dirItem
+		if m.cwd != "/" {
+			items = append(items, dirItem{name: "..", path: filepath.Dir(m.cwd), isParent: true})
+		}
+		for _, e := range entries {
+			if e.IsDir() {
+				items = append(items, dirItem{
+					name: e.Name(),
+					path: filepath.Join(m.cwd, e.Name()),
+				})
+			}
+		}
+		return folderPickerLoadedMsg{items}
+	}
 }
 
 func (m model) updateFolderPicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case folderPickerLoadedMsg:
+		m.folderPickerModel.items = msg.items
+		m.folderPickerModel.cursor = 0
+		return m, nil
+
+	case folderPickerErrorMsg:
+		m.err = msg.err
+		return m, nil
+
+	case folderSelectedMsg:
+		m.cfg.TargetDir = msg.path
+		m.screen = screenSetup
+		m.setupModel = newSetupModel(m.width, m.height, m.cfg)
+		return m, m.setupModel.Init()
+
+	case folderPickerBackMsg:
+		m.screen = screenWelcome
+		return m, nil
+
 	case tea.KeyMsg:
-		if msg.String() == "q" || msg.String() == "esc" {
+		switch msg.String() {
+		case "q", "esc":
 			m.screen = screenWelcome
+			return m, nil
+		case "up", "k":
+			if m.folderPickerModel.cursor > 0 {
+				m.folderPickerModel.cursor--
+			}
+			return m, nil
+		case "down", "j":
+			if m.folderPickerModel.cursor < len(m.folderPickerModel.items)-1 {
+				m.folderPickerModel.cursor++
+			}
+			return m, nil
+		case "left", "h":
+			parent := filepath.Dir(m.folderPickerModel.cwd)
+			if parent != m.folderPickerModel.cwd {
+				m.folderPickerModel.cwd = parent
+				return m, m.folderPickerModel.load()
+			}
+			return m, nil
+		case "right", "l", "enter":
+			if len(m.folderPickerModel.items) > 0 {
+				item := m.folderPickerModel.items[m.folderPickerModel.cursor]
+				m.folderPickerModel.cwd = item.path
+				return m, m.folderPickerModel.load()
+			}
+			return m, nil
+		case " ":
+			if len(m.folderPickerModel.items) > 0 {
+				item := m.folderPickerModel.items[m.folderPickerModel.cursor]
+				m.cfg.TargetDir = item.path
+				m.screen = screenSetup
+				m.setupModel = newSetupModel(m.width, m.height, m.cfg)
+				return m, m.setupModel.Init()
+			}
 			return m, nil
 		}
 	}
 
-	var cmd tea.Cmd
-	m.folderPickerModel.picker, cmd = m.folderPickerModel.picker.Update(msg)
-
-	if didSelect, path := m.folderPickerModel.picker.DidSelectFile(msg); didSelect {
-		m.cfg.TargetDir = path
-		m.screen = screenSetup
-		m.setupModel = newSetupModel(m.width, m.height, m.cfg)
-		return m, m.setupModel.Init()
-	}
-
-	return m, cmd
+	return m, nil
 }
 
 func (m model) folderPickerView() string {
 	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86")).MarginBottom(1)
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1)
 	pathStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("250")).MarginBottom(1)
+	cursorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("86")).Bold(true)
+	itemStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+	parentStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
+	emptyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
 
 	title := titleStyle.Render("📁 Выберите папку для очистки")
-	currentPath := pathStyle.Render("Текущая папка: " + m.folderPickerModel.picker.CurrentDirectory)
-	view := m.folderPickerModel.picker.View()
-	hints := hintStyle.Render("↑/↓ навигация • ← назад • → открыть папку • Пробел — выбрать папку • q — назад")
+	currentPath := pathStyle.Render("Текущая папка: " + m.folderPickerModel.cwd)
+
+	var lines []string
+	if len(m.folderPickerModel.items) == 0 {
+		lines = append(lines, emptyStyle.Render("(пустая папка)"))
+	} else {
+		for i, item := range m.folderPickerModel.items {
+			prefix := "  "
+			style := itemStyle
+			if item.isParent {
+				style = parentStyle
+			}
+			if i == m.folderPickerModel.cursor {
+				prefix = cursorStyle.Render("> ")
+				style = style.Copy().Bold(true)
+			}
+			suffix := "/"
+			if item.isParent {
+				suffix = ""
+			}
+			lines = append(lines, prefix+style.Render(item.name+suffix))
+		}
+	}
+
+	// Ограничиваем высоту списка
+	maxItems := m.folderPickerModel.height - 10
+	if maxItems < 3 {
+		maxItems = 3
+	}
+	if len(lines) > maxItems {
+		lines = lines[:maxItems]
+	}
+
+	listView := strings.Join(lines, "\n")
+	hints := hintStyle.Render("↑/↓ навигация • ← назад • →/Enter открыть • Пробел выбрать • q назад")
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,
-		lipgloss.JoinVertical(lipgloss.Center, title, currentPath, view, hints),
+		lipgloss.JoinVertical(lipgloss.Center, title, currentPath, listView, hints),
 	)
 }
