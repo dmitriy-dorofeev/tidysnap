@@ -90,7 +90,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if msg.String() == "ctrl+c" {
+		if msg.String() == "ctrl+c" || msg.String() == "esc" {
 			return m, tea.Quit
 		}
 
@@ -132,7 +132,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.err != nil {
-		return fmt.Sprintf("Ошибка: %v\n\nНажмите ctrl+c для выхода.", m.err)
+		return fmt.Sprintf("Ошибка: %v\n\nНажмите Esc или Ctrl+C для выхода.", m.err)
 	}
 
 	switch m.screen {
