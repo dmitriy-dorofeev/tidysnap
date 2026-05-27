@@ -57,6 +57,11 @@ func (m model) welcomeView() string {
 		Padding(1, 2).
 		MarginBottom(1)
 
+	tipStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("226")).
+		Italic(true).
+		MarginTop(1)
+
 	hintStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("240")).
 		MarginTop(2)
@@ -65,10 +70,11 @@ func (m model) welcomeView() string {
 	subtitle := subtitleStyle.Render(i18n.T("welcome_subtitle"))
 
 	content := fmt.Sprintf(
-		"%s\n\n%s\n\n%s",
+		"%s\n\n%s\n\n%s\n\n%s",
 		i18n.T("welcome_desc1"),
 		i18n.T("welcome_desc2"),
 		i18n.T("welcome_desc3"),
+		tipStyle.Render(i18n.T("welcome_tip")),
 	)
 
 	box := boxStyle.Render(content)
