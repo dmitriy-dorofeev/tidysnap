@@ -69,7 +69,7 @@ func (m model) folderPickerView() string {
 	title := titleStyle.Render("📁 Выберите папку для очистки")
 	currentPath := pathStyle.Render("Текущая папка: " + m.folderPickerModel.picker.CurrentDirectory)
 	view := m.folderPickerModel.picker.View()
-	hints := hintStyle.Render("↑/↓ навигация • Enter — открыть папку • Пробел — выбрать папку • q — назад")
+	hints := hintStyle.Render("↑/↓ навигация • ← назад • → открыть папку • Пробел — выбрать папку • q — назад")
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,
