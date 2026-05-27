@@ -33,6 +33,30 @@ func TestUpdateWarning_Yes(t *testing.T) {
 	}
 }
 
+func TestUpdateWarning_Yes_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.TargetDir = "/tmp"
+	m.cfg = cfg
+	m.screen = screenWarning
+	m.warningModel = newWarningModel("/tmp", []string{".png"}, 30)
+	m.width = 80
+	m.height = 24
+
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'н'}})
+	m2 := newM.(model)
+	if m2.screen != screenStatus && m2.err == nil {
+		t.Logf("screen = %d, err = %v", m2.screen, m2.err)
+	}
+	if m2.cfg.WarningAck != true {
+		t.Error("WarningAck should be true")
+	}
+}
+
 func TestUpdateWarning_No(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
@@ -47,6 +71,29 @@ func TestUpdateWarning_No(t *testing.T) {
 	m.height = 24
 
 	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}})
+	m2 := newM.(model)
+	if m2.screen != screenSetup {
+		t.Errorf("screen = %d, want screenSetup", m2.screen)
+	}
+	if cmd == nil {
+		t.Error("expected command from setup init")
+	}
+}
+
+func TestUpdateWarning_No_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenWarning
+	m.warningModel = newWarningModel("/tmp", []string{".png"}, 30)
+	m.width = 80
+	m.height = 24
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'т'}})
 	m2 := newM.(model)
 	if m2.screen != screenSetup {
 		t.Errorf("screen = %d, want screenSetup", m2.screen)

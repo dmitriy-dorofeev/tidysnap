@@ -32,6 +32,26 @@ func TestUpdateReset_Yes(t *testing.T) {
 	}
 }
 
+func TestUpdateReset_Yes_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenResetConfirm
+	m.resetModel = newResetModel()
+	m.width = 80
+	m.height = 24
+
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'н'}})
+	m2 := newM.(model)
+	if m2.screen != screenWelcome {
+		t.Errorf("screen = %d, want screenWelcome", m2.screen)
+	}
+}
+
 func TestUpdateReset_No(t *testing.T) {
 	m := InitialModel()
 	cfg, err := config.DefaultConfig()
@@ -43,6 +63,23 @@ func TestUpdateReset_No(t *testing.T) {
 	m.resetModel = newResetModel()
 
 	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}})
+	m2 := newM.(model)
+	if m2.screen != screenStatus {
+		t.Errorf("screen = %d, want screenStatus", m2.screen)
+	}
+}
+
+func TestUpdateReset_No_Russian(t *testing.T) {
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenResetConfirm
+	m.resetModel = newResetModel()
+
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'т'}})
 	m2 := newM.(model)
 	if m2.screen != screenStatus {
 		t.Errorf("screen = %d, want screenStatus", m2.screen)

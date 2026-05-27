@@ -46,6 +46,32 @@ func TestUpdateStatus_R(t *testing.T) {
 	}
 }
 
+func TestUpdateStatus_R_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.TargetDir = t.TempDir()
+	m.cfg = cfg
+	m.screen = screenStatus
+	m.statusModel = newStatusModel(80, 24, cfg)
+	m.width = 80
+	m.height = 24
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'к'}})
+	_ = newM.(model)
+	if cmd == nil {
+		t.Fatal("expected command for scan")
+	}
+	msg := cmd()
+	_, ok := msg.(scanDoneMsg)
+	if !ok {
+		t.Fatalf("expected scanDoneMsg, got %T", msg)
+	}
+}
+
 func TestUpdateStatus_L(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
@@ -60,6 +86,29 @@ func TestUpdateStatus_L(t *testing.T) {
 	m.height = 24
 
 	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'l'}})
+	m2 := newM.(model)
+	if m2.screen != screenLogView {
+		t.Errorf("screen = %d, want screenLogView", m2.screen)
+	}
+	if cmd == nil {
+		t.Error("expected command for log view init")
+	}
+}
+
+func TestUpdateStatus_L_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenStatus
+	m.statusModel = newStatusModel(80, 24, cfg)
+	m.width = 80
+	m.height = 24
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'д'}})
 	m2 := newM.(model)
 	if m2.screen != screenLogView {
 		t.Errorf("screen = %d, want screenLogView", m2.screen)
@@ -92,6 +141,29 @@ func TestUpdateStatus_E(t *testing.T) {
 	}
 }
 
+func TestUpdateStatus_E_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenStatus
+	m.statusModel = newStatusModel(80, 24, cfg)
+	m.width = 80
+	m.height = 24
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'у'}})
+	m2 := newM.(model)
+	if m2.screen != screenFolderPicker {
+		t.Errorf("screen = %d, want screenFolderPicker", m2.screen)
+	}
+	if cmd == nil {
+		t.Error("expected command for folder picker init")
+	}
+}
+
 func TestUpdateStatus_X(t *testing.T) {
 	m := InitialModel()
 	cfg, err := config.DefaultConfig()
@@ -103,6 +175,23 @@ func TestUpdateStatus_X(t *testing.T) {
 	m.statusModel = newStatusModel(80, 24, cfg)
 
 	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
+	m2 := newM.(model)
+	if m2.screen != screenResetConfirm {
+		t.Errorf("screen = %d, want screenResetConfirm", m2.screen)
+	}
+}
+
+func TestUpdateStatus_X_Russian(t *testing.T) {
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenStatus
+	m.statusModel = newStatusModel(80, 24, cfg)
+
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'ч'}})
 	m2 := newM.(model)
 	if m2.screen != screenResetConfirm {
 		t.Errorf("screen = %d, want screenResetConfirm", m2.screen)
@@ -126,6 +215,23 @@ func TestUpdateStatus_Q(t *testing.T) {
 	}
 }
 
+func TestUpdateStatus_Q_Russian(t *testing.T) {
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenStatus
+	m.statusModel = newStatusModel(80, 24, cfg)
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'й'}})
+	_ = newM.(model)
+	if cmd == nil {
+		t.Fatal("expected quit command")
+	}
+}
+
 func TestUpdateStatus_S_Install(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
@@ -140,6 +246,24 @@ func TestUpdateStatus_S_Install(t *testing.T) {
 	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}})
 	m2 := newM.(model)
 	// daemon.Install may succeed or fail; just verify no panic and screen stays
+	if m2.screen != screenStatus {
+		t.Logf("screen changed to %d", m2.screen)
+	}
+}
+
+func TestUpdateStatus_S_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
+	m.screen = screenStatus
+	m.statusModel = newStatusModel(80, 24, cfg)
+
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'ы'}})
+	m2 := newM.(model)
 	if m2.screen != screenStatus {
 		t.Logf("screen changed to %d", m2.screen)
 	}

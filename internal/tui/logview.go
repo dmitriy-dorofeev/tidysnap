@@ -43,8 +43,8 @@ type logLoadedMsg struct {
 func (m model) updateLogView(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc", "q":
+		switch {
+		case keyMatches(msg, 'q') || msg.String() == "esc":
 			m.screen = screenStatus
 			return m, nil
 		}

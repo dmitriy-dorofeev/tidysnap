@@ -114,35 +114,35 @@ func (m model) updateFolderPicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "esc":
+		switch {
+		case keyMatches(msg, 'q') || msg.String() == "esc":
 			m.screen = m.folderPickerModel.returnScreen
 			return m, nil
-		case "up", "k":
+		case msg.String() == "up" || keyMatches(msg, 'k'):
 			if m.folderPickerModel.cursor > 0 {
 				m.folderPickerModel.cursor--
 			}
 			return m, nil
-		case "down", "j":
+		case msg.String() == "down" || keyMatches(msg, 'j'):
 			if m.folderPickerModel.cursor < len(m.folderPickerModel.items)-1 {
 				m.folderPickerModel.cursor++
 			}
 			return m, nil
-		case "left", "h":
+		case msg.String() == "left" || keyMatches(msg, 'h'):
 			parent := filepath.Dir(m.folderPickerModel.cwd)
 			if parent != m.folderPickerModel.cwd && m.folderPickerModel.cwd != m.folderPickerModel.home {
 				m.folderPickerModel.cwd = parent
 				return m, m.folderPickerModel.load()
 			}
 			return m, nil
-		case "right", "l", "enter":
+		case msg.String() == "right" || keyMatches(msg, 'l') || msg.String() == "enter":
 			if len(m.folderPickerModel.items) > 0 {
 				item := m.folderPickerModel.items[m.folderPickerModel.cursor]
 				m.folderPickerModel.cwd = item.path
 				return m, m.folderPickerModel.load()
 			}
 			return m, nil
-		case " ":
+		case keyMatches(msg, ' '):
 			if len(m.folderPickerModel.items) > 0 {
 				item := m.folderPickerModel.items[m.folderPickerModel.cursor]
 				m.cfg.TargetDir = item.path

@@ -23,8 +23,8 @@ func (m welcomeModel) Init() tea.Cmd { return nil }
 func (m model) updateWelcome(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "s":
+		switch {
+		case msg.String() == "enter" || keyMatches(msg, 's'):
 			m.screen = screenFolderPicker
 			startDir := m.cfg.TargetDir
 			if startDir == "" {
@@ -33,7 +33,7 @@ func (m model) updateWelcome(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.folderPickerModel = newFolderPickerModel(m.width, m.height, startDir, screenWelcome)
 			return m, m.folderPickerModel.Init()
-		case "q", "esc":
+		case keyMatches(msg, 'q') || msg.String() == "esc":
 			return m, tea.Quit
 		}
 	}

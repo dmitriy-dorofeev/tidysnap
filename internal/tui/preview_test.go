@@ -73,6 +73,21 @@ func TestUpdatePreview_D(t *testing.T) {
 	}
 }
 
+func TestUpdatePreview_D_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	m.cfg = defaultConfigWithTarget("/tmp")
+	m.cfg.LogPath = filepath.Join(t.TempDir(), "cleanup.log")
+	m.screen = screenPreview
+	m.previewModel = newPreviewModel(80, 24, []scanner.ScanResult{}, false)
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'в'}})
+	_ = newM.(model)
+	if cmd == nil {
+		t.Fatal("expected command for cleanup")
+	}
+}
+
 func TestUpdatePreview_Esc(t *testing.T) {
 	m := InitialModel()
 	m.cfg = defaultConfigWithTarget("/tmp")

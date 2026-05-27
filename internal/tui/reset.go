@@ -21,8 +21,8 @@ func (m resetModel) Init() tea.Cmd { return nil }
 func (m model) updateReset(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "y":
+		switch {
+		case msg.String() == "enter" || keyMatches(msg, 'y'):
 			_ = daemon.Uninstall()
 			_ = config.Cleanup()
 			cfg, err := config.DefaultConfig()
@@ -34,7 +34,7 @@ func (m model) updateReset(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.screen = screenWelcome
 			m.welcomeModel = newWelcomeModel(m.width, m.height)
 			return m, nil
-		case "esc", "n":
+		case keyMatches(msg, 'n') || msg.String() == "esc":
 			m.screen = screenStatus
 			return m, nil
 		}

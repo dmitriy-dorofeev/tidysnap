@@ -43,12 +43,42 @@ func TestUpdateWelcome_S(t *testing.T) {
 	}
 }
 
+func TestUpdateWelcome_S_Russian(t *testing.T) {
+	setTestHome(t)
+	m := InitialModel()
+	newM, _ := m.Update(configLoadedMsg{cfg: defaultConfigWithTarget("/tmp")})
+	mod := newM.(model)
+	mod.screen = screenWelcome
+	mod.welcomeModel = newWelcomeModel(80, 24)
+
+	newM2, cmd := mod.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'ы'}})
+	m2 := newM2.(model)
+	if m2.screen != screenFolderPicker {
+		t.Errorf("screen = %d, want screenFolderPicker", m2.screen)
+	}
+	if cmd == nil {
+		t.Error("expected command")
+	}
+}
+
 func TestUpdateWelcome_Q(t *testing.T) {
 	m := InitialModel()
 	m.screen = screenWelcome
 	m.welcomeModel = newWelcomeModel(80, 24)
 
 	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
+	_ = newM.(model)
+	if cmd == nil {
+		t.Fatal("expected quit command")
+	}
+}
+
+func TestUpdateWelcome_Q_Russian(t *testing.T) {
+	m := InitialModel()
+	m.screen = screenWelcome
+	m.welcomeModel = newWelcomeModel(80, 24)
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'й'}})
 	_ = newM.(model)
 	if cmd == nil {
 		t.Fatal("expected quit command")

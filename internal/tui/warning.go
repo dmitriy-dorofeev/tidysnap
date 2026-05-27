@@ -29,15 +29,15 @@ func newWarningModel(targetDir string, extensions []string, retention int) warni
 func (m model) updateWarning(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "y":
+		switch {
+		case msg.String() == "enter" || keyMatches(msg, 'y'):
 			m.cfg.WarningAck = true
 			if err := config.Save(m.cfg); err != nil {
 				m.err = err
 				return m, nil
 			}
 			return m.saveAndGoToStatus()
-		case "esc", "n":
+		case keyMatches(msg, 'n') || msg.String() == "esc":
 			m.screen = screenSetup
 			m.setupModel = newSetupModel(m.width, m.height, m.cfg)
 			return m, m.setupModel.Init()

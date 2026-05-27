@@ -104,6 +104,43 @@ func TestUpdateFolderPicker_Navigation(t *testing.T) {
 	}
 }
 
+func TestUpdateFolderPicker_Navigation_Russian(t *testing.T) {
+	tmp := t.TempDir()
+	sub := filepath.Join(tmp, "sub")
+	os.MkdirAll(sub, 0755)
+
+	m := InitialModel()
+	m.screen = screenFolderPicker
+	m.folderPickerModel = newFolderPickerModel(80, 24, tmp, screenWelcome)
+	m.folderPickerModel.items = []dirItem{
+		{name: "sub", path: sub},
+	}
+
+	// down (Russian 'о')
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'о'}})
+	m2 := newM.(model)
+	if m2.folderPickerModel.cursor != 0 {
+		t.Logf("cursor = %d", m2.folderPickerModel.cursor)
+	}
+
+	// up should not go below 0 (Russian 'л')
+	newM, _ = m2.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'л'}})
+	m3 := newM.(model)
+	if m3.folderPickerModel.cursor != 0 {
+		t.Errorf("cursor = %d, want 0", m3.folderPickerModel.cursor)
+	}
+
+	// enter should navigate into sub
+	newM, cmd := m3.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m4 := newM.(model)
+	if m4.folderPickerModel.cwd != sub {
+		t.Errorf("cwd = %q, want %q", m4.folderPickerModel.cwd, sub)
+	}
+	if cmd == nil {
+		t.Error("expected load command after entering directory")
+	}
+}
+
 func TestUpdateFolderPicker_Back(t *testing.T) {
 	tmp := t.TempDir()
 	m := InitialModel()
@@ -111,6 +148,19 @@ func TestUpdateFolderPicker_Back(t *testing.T) {
 	m.folderPickerModel = newFolderPickerModel(80, 24, tmp, screenWelcome)
 
 	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
+	m2 := newM.(model)
+	if m2.screen != screenWelcome {
+		t.Errorf("screen = %d, want screenWelcome", m2.screen)
+	}
+}
+
+func TestUpdateFolderPicker_Back_Russian(t *testing.T) {
+	tmp := t.TempDir()
+	m := InitialModel()
+	m.screen = screenFolderPicker
+	m.folderPickerModel = newFolderPickerModel(80, 24, tmp, screenWelcome)
+
+	newM, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'й'}})
 	m2 := newM.(model)
 	if m2.screen != screenWelcome {
 		t.Errorf("screen = %d, want screenWelcome", m2.screen)
@@ -155,6 +205,25 @@ func TestUpdateFolderPicker_Left(t *testing.T) {
 	m.folderPickerModel = newFolderPickerModel(80, 24, sub, screenWelcome)
 
 	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'h'}})
+	m2 := newM.(model)
+	if m2.folderPickerModel.cwd != tmp {
+		t.Errorf("cwd = %q, want %q", m2.folderPickerModel.cwd, tmp)
+	}
+	if cmd == nil {
+		t.Error("expected load command after going up")
+	}
+}
+
+func TestUpdateFolderPicker_Left_Russian(t *testing.T) {
+	tmp := t.TempDir()
+	sub := filepath.Join(tmp, "sub")
+	os.MkdirAll(sub, 0755)
+
+	m := InitialModel()
+	m.screen = screenFolderPicker
+	m.folderPickerModel = newFolderPickerModel(80, 24, sub, screenWelcome)
+
+	newM, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'р'}})
 	m2 := newM.(model)
 	if m2.folderPickerModel.cwd != tmp {
 		t.Errorf("cwd = %q, want %q", m2.folderPickerModel.cwd, tmp)

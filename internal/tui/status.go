@@ -51,24 +51,24 @@ func pollDaemonStatusCmd(intervalHours int) tea.Cmd {
 func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "r":
+		switch {
+		case keyMatches(msg, 'r'):
 			return m.runScan()
-		case "l":
+		case keyMatches(msg, 'l'):
 			m.screen = screenLogView
 			m.logViewModel = newLogViewModel(m.width, m.height)
 			return m, m.logViewModel.Init()
-		case "e":
+		case keyMatches(msg, 'e'):
 			m.screen = screenFolderPicker
 			m.folderPickerModel = newFolderPickerModel(m.width, m.height, m.cfg.TargetDir, screenStatus)
 			return m, m.folderPickerModel.Init()
-		case "s":
+		case keyMatches(msg, 's'):
 			return m, tea.Batch(m.daemonActionCmd(), pollDaemonStatusCmd(m.cfg.CheckIntervalHours))
-		case "x":
+		case keyMatches(msg, 'x'):
 			m.screen = screenResetConfirm
 			m.resetModel = newResetModel()
 			return m, nil
-		case "q", "esc":
+		case keyMatches(msg, 'q') || msg.String() == "esc":
 			return m, tea.Quit
 		}
 	case scanDoneMsg:

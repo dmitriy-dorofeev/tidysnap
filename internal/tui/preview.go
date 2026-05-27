@@ -57,10 +57,10 @@ func (m previewModel) Init() tea.Cmd { return nil }
 func (m model) updatePreview(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "d":
+		switch {
+		case msg.String() == "enter" || keyMatches(msg, 'd'):
 			return m.runCleanup()
-		case "esc", "q":
+		case keyMatches(msg, 'q') || msg.String() == "esc":
 			m.screen = screenStatus
 			return m, nil
 		}
