@@ -183,6 +183,11 @@ func needsWarning(dir string) bool {
 		filepath.Join(home, "Desktop"),
 		filepath.Join(home, "Downloads"),
 		filepath.Join(home, "Documents"),
+		filepath.Join(home, "Movies"),
+		filepath.Join(home, "Music"),
+		filepath.Join(home, "Pictures"),
+		filepath.Join(home, "Public"),
+		filepath.Join(home, "Library"),
 	}
 	for _, d := range warnDirs {
 		if dir == d {

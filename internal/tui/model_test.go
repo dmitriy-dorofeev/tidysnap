@@ -216,6 +216,11 @@ func TestNeedsWarning(t *testing.T) {
 		{filepath.Join(home, "Desktop"), true},
 		{filepath.Join(home, "Downloads"), true},
 		{filepath.Join(home, "Documents"), true},
+		{filepath.Join(home, "Movies"), true},
+		{filepath.Join(home, "Music"), true},
+		{filepath.Join(home, "Pictures"), true},
+		{filepath.Join(home, "Public"), true},
+		{filepath.Join(home, "Library"), true},
 		{filepath.Join(home, "Screenshots"), false},
 		{"/tmp", false},
 	}

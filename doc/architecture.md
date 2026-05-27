@@ -81,7 +81,7 @@ tidysnap/
 | `screenWelcome` | Приветствие и начало настройки |
 | `screenFolderPicker` | Интерактивный выбор папки |
 | `screenSetup` | Форма параметров (расширения, срок, интервал, dry-run) |
-| `screenWarning` | Предупреждение при выборе Desktop/Downloads/Documents |
+| `screenWarning` | Предупреждение при выборе системных папок (Desktop, Downloads, Documents, Movies, Music, Pictures, Public, Library) |
 | `screenStatus` | Главный экран: статус, запуск очистки, управление демоном |
 | `screenPreview` | Список файлов к удалению |
 | `screenLogView` | Просмотр файла логов |

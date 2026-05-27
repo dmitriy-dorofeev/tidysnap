@@ -24,6 +24,11 @@
 - `Desktop`
 - `Downloads`
 - `Documents`
+- `Movies`
+- `Music`
+- `Pictures`
+- `Public`
+- `Library`
 
 Пользователь должен явно подтвердить осознание риска (`warning_ack`).
 
