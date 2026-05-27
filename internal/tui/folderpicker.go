@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/bubbles/filepicker"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -21,6 +22,8 @@ func newFolderPickerModel(width, height int, startDir string) folderPickerModel 
 	fp.ShowHidden = false
 	fp.AutoHeight = false
 	fp.SetHeight(height - 8)
+	fp.KeyMap.Select = key.NewBinding(key.WithKeys(" "), key.WithHelp("space", "select"))
+	fp.KeyMap.Open = key.NewBinding(key.WithKeys("l", "right", "enter"), key.WithHelp("l", "open"))
 
 	if startDir == "" {
 		home, _ := os.UserHomeDir()
