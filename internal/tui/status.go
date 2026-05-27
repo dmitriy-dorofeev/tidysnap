@@ -35,6 +35,19 @@ func newStatusModel(width, height int, cfg *config.Config) statusModel {
 	return statusModel{width: width, height: height, cfg: cfg, status: getDaemonStatus(cfg.CheckIntervalHours)}
 }
 
+func (sm statusModel) Init() tea.Cmd {
+	if sm.status.running {
+		return pollDaemonStatusCmd(sm.cfg.CheckIntervalHours)
+	}
+	return nil
+}
+
+func pollDaemonStatusCmd(intervalHours int) tea.Cmd {
+	return tea.Tick(2*time.Second, func(t time.Time) tea.Msg {
+		return daemonStatusMsg{status: getDaemonStatus(intervalHours)}
+	})
+}
+
 func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -50,7 +63,7 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.folderPickerModel = newFolderPickerModel(m.width, m.height, m.cfg.TargetDir, screenStatus)
 			return m, m.folderPickerModel.Init()
 		case "s":
-			return m, m.daemonActionCmd()
+			return m, tea.Batch(m.daemonActionCmd(), pollDaemonStatusCmd(m.cfg.CheckIntervalHours))
 		case "x":
 			m.screen = screenResetConfirm
 			m.resetModel = newResetModel()
@@ -71,6 +84,9 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusModel.status = msg.status
 		if msg.errMsg != "" {
 			m.statusModel.msg = msg.errMsg
+		}
+		if m.statusModel.status.running {
+			return m, pollDaemonStatusCmd(m.cfg.CheckIntervalHours)
 		}
 		return m, nil
 	}

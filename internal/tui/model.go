@@ -107,10 +107,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if config.Exists() {
 			m.screen = screenStatus
 			m.statusModel = newStatusModel(m.width, m.height, m.cfg)
-		} else {
-			m.screen = screenWelcome
-			m.welcomeModel = newWelcomeModel(m.width, m.height)
+			return m, m.statusModel.Init()
 		}
+		m.screen = screenWelcome
+		m.welcomeModel = newWelcomeModel(m.width, m.height)
 		return m, nil
 
 	case saveAndGoToStatusMsg:
@@ -120,7 +120,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.screen = screenStatus
 		m.statusModel = newStatusModel(m.width, m.height, m.cfg)
-		return m, nil
+		return m, m.statusModel.Init()
 
 	case errMsg:
 		m.err = msg.err
