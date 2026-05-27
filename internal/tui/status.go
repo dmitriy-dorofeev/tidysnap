@@ -37,17 +37,22 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.setupModel = newSetupModel(m.width, m.height, m.cfg)
 			return m, m.setupModel.Init()
 		case "s":
-			if daemon.IsRunning() {
+			switch {
+			case !daemon.IsInstalled():
+				if err := daemon.Install(daemon.BinaryPath(), m.cfg.CheckIntervalHours); err != nil {
+					m.statusModel.msg = fmt.Sprintf("Ошибка установки: %v", err)
+				}
+			case daemon.IsRunning():
 				if err := daemon.Stop(); err != nil {
 					m.statusModel.msg = fmt.Sprintf("Ошибка остановки: %v", err)
 				}
-			} else if daemon.IsInstalled() {
+			case daemon.IsLoaded():
 				if err := daemon.Start(); err != nil {
 					m.statusModel.msg = fmt.Sprintf("Ошибка запуска: %v", err)
 				}
-			} else {
-				if err := daemon.Install(daemon.BinaryPath(), m.cfg.CheckIntervalHours); err != nil {
-					m.statusModel.msg = fmt.Sprintf("Ошибка установки: %v", err)
+			default:
+				if err := daemon.Load(); err != nil {
+					m.statusModel.msg = fmt.Sprintf("Ошибка загрузки: %v", err)
 				}
 			}
 			return m, nil
@@ -90,13 +95,16 @@ func (m model) statusView() string {
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1)
 	msgStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("220")).MarginTop(1)
 
-	status := "❌ Не установлен"
-	if daemon.IsInstalled() {
-		if daemon.IsRunning() {
-			status = "✅ Активен"
-		} else {
-			status = "⚠️  Установлен, но не запущен"
-		}
+	var status string
+	switch {
+	case !daemon.IsInstalled():
+		status = "❌ Не установлен"
+	case daemon.IsRunning():
+		status = "✅ Выполняется"
+	case daemon.IsLoaded():
+		status = "⏳ Установлен (запустится по расписанию)"
+	default:
+		status = "⏸️  Установлен, но выгружен"
 	}
 
 	lines := []string{
@@ -113,12 +121,15 @@ func (m model) statusView() string {
 
 	box := boxStyle.Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
 	var daemonHint string
-	if daemon.IsRunning() {
-		daemonHint = "[s] Остановить демон"
-	} else if daemon.IsInstalled() {
-		daemonHint = "[s] Запустить демон"
-	} else {
+	switch {
+	case !daemon.IsInstalled():
 		daemonHint = "[s] Установить демон"
+	case daemon.IsRunning():
+		daemonHint = "[s] Остановить демон"
+	case daemon.IsLoaded():
+		daemonHint = "[s] Запустить сейчас"
+	default:
+		daemonHint = "[s] Загрузить демон"
 	}
 	hints := hintStyle.Render("[r] Запустить очистку  [l] Логи  [e] Настройки  " + daemonHint + "  [x] Удалить  [q] Выход")
 

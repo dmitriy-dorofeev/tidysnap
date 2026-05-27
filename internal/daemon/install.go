@@ -44,6 +44,15 @@ func IsInstalled() bool {
 	return err == nil
 }
 
+func IsLoaded() bool {
+	out, err := exec.Command("launchctl", "list", label).Output()
+	if err != nil {
+		return false
+	}
+	fields := strings.Fields(string(out))
+	return len(fields) >= 3 && fields[2] == label
+}
+
 func IsRunning() bool {
 	out, err := exec.Command("launchctl", "list", label).Output()
 	if err != nil {
@@ -54,6 +63,16 @@ func IsRunning() bool {
 		return fields[0] != "-" && fields[0] != ""
 	}
 	return false
+}
+
+func Load() error {
+	plistPath := config.PlistPath()
+	return exec.Command("launchctl", "load", plistPath).Run()
+}
+
+func Unload() error {
+	plistPath := config.PlistPath()
+	return exec.Command("launchctl", "unload", plistPath).Run()
 }
 
 func Stop() error {
