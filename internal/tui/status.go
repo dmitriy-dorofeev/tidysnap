@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -37,6 +36,27 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.screen = screenSetup
 			m.setupModel = newSetupModel(m.width, m.height, m.cfg)
 			return m, m.setupModel.Init()
+		case "s":
+			if daemon.IsRunning() {
+				if err := daemon.Stop(); err != nil {
+					m.statusModel.msg = fmt.Sprintf("Ошибка остановки: %v", err)
+				} else {
+					m.statusModel.msg = "Демон остановлен"
+				}
+			} else if daemon.IsInstalled() {
+				if err := daemon.Start(); err != nil {
+					m.statusModel.msg = fmt.Sprintf("Ошибка запуска: %v", err)
+				} else {
+					m.statusModel.msg = "Демон запущен"
+				}
+			} else {
+				if err := daemon.Install(daemon.BinaryPath(), m.cfg.CheckIntervalHours); err != nil {
+					m.statusModel.msg = fmt.Sprintf("Ошибка установки: %v", err)
+				} else {
+					m.statusModel.msg = "Демон установлен и запущен"
+				}
+			}
+			return m, nil
 		case "q", "esc":
 			return m, tea.Quit
 		}
@@ -74,8 +94,7 @@ func (m model) statusView() string {
 
 	status := "❌ Не установлен"
 	if daemon.IsInstalled() {
-		out, _ := exec.Command("launchctl", "list", "com.tidysnap").CombinedOutput()
-		if strings.Contains(string(out), "com.tidysnap") {
+		if daemon.IsRunning() {
 			status = "✅ Активен"
 		} else {
 			status = "⚠️  Установлен, но не запущен"
@@ -95,7 +114,15 @@ func (m model) statusView() string {
 	}
 
 	box := boxStyle.Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
-	hints := hintStyle.Render("[r] Запустить очистку  [l] Логи  [e] Настройки  [q] Выход")
+	var daemonHint string
+	if daemon.IsRunning() {
+		daemonHint = "[s] Остановить демон"
+	} else if daemon.IsInstalled() {
+		daemonHint = "[s] Запустить демон"
+	} else {
+		daemonHint = "[s] Установить демон"
+	}
+	hints := hintStyle.Render("[r] Запустить очистку  [l] Логи  [e] Настройки  " + daemonHint + "  [q] Выход")
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,

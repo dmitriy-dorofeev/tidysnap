@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 )
@@ -41,6 +42,19 @@ func IsInstalled() bool {
 	plistPath := config.PlistPath()
 	_, err := os.Stat(plistPath)
 	return err == nil
+}
+
+func IsRunning() bool {
+	out, _ := exec.Command("launchctl", "list", label).CombinedOutput()
+	return strings.Contains(string(out), label)
+}
+
+func Stop() error {
+	return exec.Command("launchctl", "stop", label).Run()
+}
+
+func Start() error {
+	return exec.Command("launchctl", "start", label).Run()
 }
 
 func BinaryPath() string {
