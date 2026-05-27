@@ -196,8 +196,9 @@ func (m model) folderPickerView() string {
 	listView := strings.Join(lines, "\n")
 	hints := hintStyle.Render("↑/↓ навигация • ← назад • →/Enter открыть • Пробел выбрать • q назад")
 
+	content := lipgloss.JoinVertical(lipgloss.Left, currentPath, listView)
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,
-		lipgloss.JoinVertical(lipgloss.Center, title, currentPath, listView, hints),
+		lipgloss.JoinVertical(lipgloss.Center, title, content, hints),
 	)
 }
