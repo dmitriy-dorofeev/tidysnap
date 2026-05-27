@@ -19,7 +19,10 @@ func Install(binaryPath string, intervalHours int) error {
 		return fmt.Errorf("write plist: %w", err)
 	}
 
-	plistPath := config.PlistPath()
+	plistPath, err := config.PlistPath()
+	if err != nil {
+		return fmt.Errorf("plist path: %w", err)
+	}
 	// #nosec G204 — plistPath is an internal system path, not user input.
 	if err := exec.Command("launchctl", "load", plistPath).Run(); err != nil {
 		return fmt.Errorf("launchctl load: %w", err)
@@ -31,19 +34,32 @@ func Install(binaryPath string, intervalHours int) error {
 }
 
 func Uninstall() error {
-	plistPath := config.PlistPath()
+	var errs []error
 
 	_ = exec.Command("launchctl", "stop", label).Run()
-	// #nosec G204 — plistPath is an internal system path, not user input.
-	_ = exec.Command("launchctl", "unload", plistPath).Run()
 
-	_ = RemovePlist()
+	plistPath, err := config.PlistPath()
+	if err == nil {
+		// #nosec G204 — plistPath is an internal system path, not user input.
+		_ = exec.Command("launchctl", "unload", plistPath).Run()
+	}
+
+	if err := RemovePlist(); err != nil {
+		errs = append(errs, err)
+	}
+
+	if len(errs) > 0 {
+		return errs[0]
+	}
 	return nil
 }
 
 func IsInstalled() bool {
-	plistPath := config.PlistPath()
-	_, err := os.Stat(plistPath)
+	plistPath, err := config.PlistPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(plistPath)
 	return err == nil
 }
 
@@ -68,13 +84,19 @@ func IsRunning() bool {
 }
 
 func Load() error {
-	plistPath := config.PlistPath()
+	plistPath, err := config.PlistPath()
+	if err != nil {
+		return err
+	}
 	// #nosec G204 — plistPath is an internal system path, not user input.
 	return exec.Command("launchctl", "load", plistPath).Run()
 }
 
 func Unload() error {
-	plistPath := config.PlistPath()
+	plistPath, err := config.PlistPath()
+	if err != nil {
+		return err
+	}
 	// #nosec G204 — plistPath is an internal system path, not user input.
 	return exec.Command("launchctl", "unload", plistPath).Run()
 }
@@ -99,7 +121,10 @@ func NextRunTime(intervalHours int) (time.Time, bool) {
 	if !IsInstalled() || !IsLoaded() {
 		return time.Time{}, false
 	}
-	logPath := config.LogPath()
+	logPath, err := config.LogPath()
+	if err != nil {
+		return time.Time{}, false
+	}
 	info, err := os.Stat(logPath)
 	if err != nil {
 		return time.Time{}, false

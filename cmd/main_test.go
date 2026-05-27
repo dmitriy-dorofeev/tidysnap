@@ -31,7 +31,10 @@ func TestRunCleanup(t *testing.T) {
 	os.Chtimes(oldFile, oldTime, oldTime)
 
 	// Create config
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.TargetDir = targetDir
 	cfg.Extensions = []string{".png"}
 	cfg.RetentionDays = 30
@@ -42,7 +45,9 @@ func TestRunCleanup(t *testing.T) {
 	}
 
 	// Run cleanup
-	runCleanup()
+	if err := runCleanup(); err != nil {
+		t.Fatalf("runCleanup error: %v", err)
+	}
 
 	// Verify file was deleted
 	if _, err := os.Stat(oldFile); !os.IsNotExist(err) {
@@ -69,7 +74,10 @@ func TestRunCleanup_DryRun(t *testing.T) {
 	oldTime := time.Now().Add(-100 * 24 * time.Hour)
 	os.Chtimes(oldFile, oldTime, oldTime)
 
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.TargetDir = targetDir
 	cfg.Extensions = []string{".png"}
 	cfg.RetentionDays = 30
@@ -79,7 +87,9 @@ func TestRunCleanup_DryRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runCleanup()
+	if err := runCleanup(); err != nil {
+		t.Fatalf("runCleanup error: %v", err)
+	}
 
 	if _, err := os.Stat(oldFile); os.IsNotExist(err) {
 		t.Error("file should still exist in dry run")

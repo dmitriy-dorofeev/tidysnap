@@ -2,6 +2,7 @@ package cleaner
 
 import (
 	"bytes"
+	"context"
 	"log"
 	"os"
 	"path/filepath"
@@ -39,7 +40,7 @@ func TestClean_DryRun(t *testing.T) {
 		{Path: f, Size: 5},
 	}
 
-	stats, err := c.Clean(files)
+	stats, err := c.Clean(context.Background(), files)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -77,7 +78,7 @@ func TestClean_RealDelete(t *testing.T) {
 		{Path: f, Size: 5},
 	}
 
-	stats, err := c.Clean(files)
+	stats, err := c.Clean(context.Background(), files)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -115,7 +116,7 @@ func TestClean_MultipleFiles(t *testing.T) {
 		{Path: f2, Size: 2},
 	}
 
-	stats, err := c.Clean(files)
+	stats, err := c.Clean(context.Background(), files)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -136,7 +137,7 @@ func TestClean_ErrorOnMissingFile(t *testing.T) {
 		{Path: "/nonexistent/file.png", Size: 0},
 	}
 
-	stats, err := c.Clean(files)
+	stats, err := c.Clean(context.Background(), files)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -154,7 +155,7 @@ func TestClean_EmptyList(t *testing.T) {
 	logger := log.New(&buf, "", 0)
 	c := New(false, logger)
 
-	stats, err := c.Clean(nil)
+	stats, err := c.Clean(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -4,35 +4,16 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 )
 
-func TestHumanizeBytes(t *testing.T) {
-	tests := []struct {
-		bytes int64
-		want  string
-	}{
-		{0, "0 B"},
-		{512, "512 B"},
-		{1024, "1.0 KB"},
-		{1536, "1.5 KB"},
-		{1024 * 1024, "1.0 MB"},
-		{1024 * 1024 * 1024, "1.0 GB"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.want, func(t *testing.T) {
-			got := humanizeBytes(tt.bytes)
-			if got != tt.want {
-				t.Errorf("humanizeBytes(%d) = %q, want %q", tt.bytes, got, tt.want)
-			}
-		})
-	}
-}
-
 func TestNewStatusModel(t *testing.T) {
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m := newStatusModel(80, 24, cfg)
 	if m.width != 80 || m.height != 24 {
 		t.Error("dimensions mismatch")
@@ -42,7 +23,10 @@ func TestNewStatusModel(t *testing.T) {
 func TestUpdateStatus_R(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.TargetDir = t.TempDir()
 	m.cfg = cfg
 	m.screen = screenStatus
@@ -65,7 +49,10 @@ func TestUpdateStatus_R(t *testing.T) {
 func TestUpdateStatus_L(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -85,7 +72,10 @@ func TestUpdateStatus_L(t *testing.T) {
 func TestUpdateStatus_E(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -104,7 +94,10 @@ func TestUpdateStatus_E(t *testing.T) {
 
 func TestUpdateStatus_X(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -118,7 +111,10 @@ func TestUpdateStatus_X(t *testing.T) {
 
 func TestUpdateStatus_Q(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -133,7 +129,10 @@ func TestUpdateStatus_Q(t *testing.T) {
 func TestUpdateStatus_S_Install(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -148,7 +147,10 @@ func TestUpdateStatus_S_Install(t *testing.T) {
 
 func TestUpdateStatus_UnknownKey(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -162,12 +164,15 @@ func TestUpdateStatus_UnknownKey(t *testing.T) {
 
 func TestUpdateStatus_CleanupDone(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
 
-	stats := &scanner.CleanupStats{FilesRemoved: 5, BytesFreed: 1024}
+	stats := &cleaner.CleanupStats{FilesRemoved: 5, BytesFreed: 1024}
 	newM, _ := m.Update(cleanupDoneMsg{stats: stats})
 	m2 := newM.(model)
 	if m2.screen != screenStatus {
@@ -180,7 +185,10 @@ func TestUpdateStatus_CleanupDone(t *testing.T) {
 
 func TestUpdateStatus_ScanDone(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -201,7 +209,10 @@ func TestUpdateStatus_ScanDone(t *testing.T) {
 func TestStatusView(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenStatus
 	m.statusModel = newStatusModel(80, 24, cfg)
@@ -216,7 +227,10 @@ func TestStatusView(t *testing.T) {
 func TestRunScan(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.TargetDir = t.TempDir()
 	m.cfg = cfg
 	m.screen = screenStatus

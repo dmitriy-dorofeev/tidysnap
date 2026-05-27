@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -37,7 +38,12 @@ func main() {
 	}
 
 	if *configPathFlag {
-		fmt.Println(config.ConfigPath())
+		path, err := config.ConfigPath()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Ошибка: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println(path)
 		return
 	}
 
@@ -63,7 +69,10 @@ func main() {
 	}
 
 	if *cleanupFlag {
-		runCleanup()
+		if err := runCleanup(); err != nil {
+			fmt.Fprintf(os.Stderr, "Ошибка очистки: %v\n", err)
+			os.Exit(1)
+		}
 		return
 	}
 
@@ -75,35 +84,38 @@ func main() {
 	}
 }
 
-func runCleanup() {
+func runCleanup() error {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("Ошибка загрузки конфига: %v", err)
+		return fmt.Errorf("ошибка загрузки конфига: %w", err)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(cfg.LogPath), 0750); err != nil {
-		log.Fatalf("Ошибка создания папки логов: %v", err)
+		return fmt.Errorf("ошибка создания папки логов: %w", err)
 	}
 
 	logFile, err := os.OpenFile(cfg.LogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		log.Fatalf("Ошибка открытия лога: %v", err)
+		return fmt.Errorf("ошибка открытия лога: %w", err)
 	}
 	defer logFile.Close()
 
 	logger := log.New(logFile, "", log.LstdFlags)
 
+	ctx := context.Background()
+
 	s := scanner.New(cfg.Extensions, cfg.RetentionDays)
-	files, err := s.Scan(cfg.TargetDir)
+	files, err := s.Scan(ctx, cfg.TargetDir)
 	if err != nil {
-		logger.Fatalf("Ошибка сканирования: %v", err)
+		return fmt.Errorf("ошибка сканирования: %w", err)
 	}
 
 	c := cleaner.New(cfg.DryRun, logger)
-	stats, err := c.Clean(files)
+	stats, err := c.Clean(ctx, files)
 	if err != nil {
-		logger.Fatalf("Ошибка очистки: %v", err)
+		return fmt.Errorf("ошибка очистки: %w", err)
 	}
 
 	logger.Printf("Cleanup complete: removed %d files, freed %d bytes", stats.FilesRemoved, stats.BytesFreed)
+	return nil
 }

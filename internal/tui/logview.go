@@ -22,7 +22,11 @@ func newLogViewModel(width, height int) logViewModel {
 
 func (m logViewModel) Init() tea.Cmd {
 	return func() tea.Msg {
-		data, err := os.ReadFile(config.LogPath())
+		logPath, err := config.LogPath()
+		if err != nil {
+			return errMsg{err}
+		}
+		data, err := os.ReadFile(logPath)
 		if err != nil {
 			return errMsg{err}
 		}

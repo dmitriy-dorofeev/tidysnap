@@ -90,7 +90,10 @@ func TestUpdate_Esc(t *testing.T) {
 func TestUpdate_ConfigLoaded_WithoutConfig(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	newM, cmd := m.Update(configLoadedMsg{cfg: cfg})
 	model := newM.(model)
 	if model.screen != screenWelcome {
@@ -104,7 +107,10 @@ func TestUpdate_ConfigLoaded_WithoutConfig(t *testing.T) {
 func TestUpdate_ConfigLoaded_WithConfig(t *testing.T) {
 	tmp := setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	// Save config so Exists returns true
 	if err := config.Save(cfg); err != nil {
 		t.Fatal(err)
@@ -163,7 +169,11 @@ func TestView_AllScreens(t *testing.T) {
 		m.screen = s
 		m.width = 80
 		m.height = 24
-		m.cfg = config.DefaultConfig()
+		cfg, err := config.DefaultConfig()
+		if err != nil {
+			t.Fatal(err)
+		}
+		m.cfg = cfg
 		m.folderPickerModel = newFolderPickerModel(80, 24, "/tmp", screenWelcome)
 		m.folderPickerModel.items = []dirItem{{name: "tmp", path: "/tmp"}}
 		m.welcomeModel = newWelcomeModel(80, 24)

@@ -41,7 +41,10 @@ type folderSelectedMsg struct {
 type folderPickerBackMsg struct{}
 
 func newFolderPickerModel(width, height int, startDir string, returnScreen screen) folderPickerModel {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = "/"
+	}
 	if startDir == "" {
 		startDir = home
 	}
@@ -71,7 +74,8 @@ func (m folderPickerModel) load() tea.Cmd {
 			return strings.ToLower(entries[i].Name()) < strings.ToLower(entries[j].Name())
 		})
 
-		var items []dirItem
+		capacity := len(entries) + 1
+		items := make([]dirItem, 0, capacity)
 		if m.cwd != m.home {
 			items = append(items, dirItem{name: "..", path: filepath.Dir(m.cwd), isParent: true})
 		}

@@ -75,7 +75,10 @@ func TestWelcomeView(t *testing.T) {
 }
 
 func defaultConfigWithTarget(target string) *config.Config {
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		panic(err)
+	}
 	cfg.TargetDir = target
 	return cfg
 }

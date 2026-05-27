@@ -46,22 +46,23 @@ func (m model) updateWarning(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) saveAndGoToStatus() (tea.Model, tea.Cmd) {
-	if err := config.Save(m.cfg); err != nil {
-		m.err = err
-		return m, nil
+	return m, func() tea.Msg {
+		if err := config.Save(m.cfg); err != nil {
+			return saveAndGoToStatusMsg{err: err}
+		}
+		logDir, err := config.LogDir()
+		if err != nil {
+			return saveAndGoToStatusMsg{err: err}
+		}
+		if err := os.MkdirAll(logDir, 0750); err != nil {
+			return saveAndGoToStatusMsg{err: err}
+		}
+		binary := daemon.BinaryPath()
+		if err := daemon.Install(binary, m.cfg.CheckIntervalHours); err != nil {
+			return saveAndGoToStatusMsg{err: err}
+		}
+		return saveAndGoToStatusMsg{}
 	}
-	if err := os.MkdirAll(config.LogDir(), 0750); err != nil {
-		m.err = err
-		return m, nil
-	}
-	binary := daemon.BinaryPath()
-	if err := daemon.Install(binary, m.cfg.CheckIntervalHours); err != nil {
-		m.err = err
-		return m, nil
-	}
-	m.screen = screenStatus
-	m.statusModel = newStatusModel(m.width, m.height, m.cfg)
-	return m, nil
 }
 
 func (m model) warningView() string {

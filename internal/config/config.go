@@ -18,12 +18,15 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		return nil, err
+	}
 	// #nosec G304 — path is an internal config path, not user input.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return DefaultConfig(), nil
+			return DefaultConfig()
 		}
 		return nil, err
 	}
@@ -36,7 +39,10 @@ func Load() (*Config, error) {
 }
 
 func Save(cfg *Config) error {
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0750); err != nil {
 		return err
 	}
@@ -50,11 +56,18 @@ func Save(cfg *Config) error {
 }
 
 func Reset() error {
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		return err
+	}
 	return os.Remove(path)
 }
 
 func Exists() bool {
-	_, err := os.Stat(ConfigPath())
+	path, err := ConfigPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(path)
 	return err == nil
 }

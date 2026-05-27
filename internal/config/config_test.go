@@ -9,7 +9,10 @@ import (
 )
 
 func TestDefaultConfig(t *testing.T) {
-	cfg := DefaultConfig()
+	cfg, err := DefaultConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if cfg.TargetDir == "" {
 		t.Error("TargetDir should not be empty")
 	}
@@ -28,7 +31,10 @@ func TestDefaultConfig(t *testing.T) {
 }
 
 func TestConfigPath(t *testing.T) {
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if path == "" {
 		t.Error("ConfigPath should not be empty")
 	}
@@ -38,14 +44,20 @@ func TestConfigPath(t *testing.T) {
 }
 
 func TestConfigDir(t *testing.T) {
-	dir := ConfigDir()
+	dir, err := ConfigDir()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if dir == "" {
 		t.Error("ConfigDir should not be empty")
 	}
 }
 
 func TestLogPath(t *testing.T) {
-	path := LogPath()
+	path, err := LogPath()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if path == "" {
 		t.Error("LogPath should not be empty")
 	}
@@ -55,7 +67,10 @@ func TestLogPath(t *testing.T) {
 }
 
 func TestPlistPath(t *testing.T) {
-	path := PlistPath()
+	path, err := PlistPath()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if path == "" {
 		t.Error("PlistPath should not be empty")
 	}
@@ -89,7 +104,10 @@ func TestLoad_ReadError(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +119,7 @@ func TestLoad_ReadError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := Load()
+	_, err = Load()
 	if err == nil {
 		t.Fatal("expected error when config path is a directory")
 	}
@@ -153,7 +171,10 @@ func TestSave_MkdirError(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	parent := filepath.Dir(path)
 	// Create intermediate dirs, then create parent as a file
 	if err := os.MkdirAll(filepath.Dir(parent), 0755); err != nil {
@@ -163,8 +184,11 @@ func TestSave_MkdirError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cfg := DefaultConfig()
-	err := Save(cfg)
+	cfg, err := DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Save(cfg)
 	if err == nil {
 		t.Fatal("expected error when parent path is a file")
 	}
@@ -176,7 +200,10 @@ func TestReset(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	cfg := DefaultConfig()
+	cfg, err := DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := Save(cfg); err != nil {
 		t.Fatalf("Save error: %v", err)
 	}
@@ -199,7 +226,10 @@ func TestLoad_InvalidYAML(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	path := ConfigPath()
+	path, err := ConfigPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +237,7 @@ func TestLoad_InvalidYAML(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := Load()
+	_, err = Load()
 	if err == nil {
 		t.Fatal("expected error for invalid YAML")
 	}
@@ -219,7 +249,10 @@ func TestCleanup(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	cfg := DefaultConfig()
+	cfg, err := DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	Save(cfg)
 
 	if err := Cleanup(); err != nil {

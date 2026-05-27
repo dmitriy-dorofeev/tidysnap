@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 )
@@ -77,11 +78,15 @@ type errMsg struct {
 }
 
 type cleanupDoneMsg struct {
-	stats *scanner.CleanupStats
+	stats *cleaner.CleanupStats
 }
 
 type scanDoneMsg struct {
 	files []scanner.ScanResult
+}
+
+type saveAndGoToStatusMsg struct {
+	err error
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -105,6 +110,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.screen = screenWelcome
 			m.welcomeModel = newWelcomeModel(m.width, m.height)
 		}
+		return m, nil
+
+	case saveAndGoToStatusMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			return m, nil
+		}
+		m.screen = screenStatus
+		m.statusModel = newStatusModel(m.width, m.height, m.cfg)
 		return m, nil
 
 	case errMsg:
@@ -162,7 +176,11 @@ func (m model) View() string {
 }
 
 func containsSystemDir(path string) bool {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = "/"
+	}
+	path = filepath.Clean(path)
 	systemDirs := []string{
 		"/",
 		"/System",
@@ -170,7 +188,7 @@ func containsSystemDir(path string) bool {
 		home,
 	}
 	for _, d := range systemDirs {
-		if path == d {
+		if path == filepath.Clean(d) {
 			return true
 		}
 	}
@@ -178,7 +196,11 @@ func containsSystemDir(path string) bool {
 }
 
 func needsWarning(dir string) bool {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return false
+	}
+	dir = filepath.Clean(dir)
 	warnDirs := []string{
 		filepath.Join(home, "Desktop"),
 		filepath.Join(home, "Downloads"),
@@ -190,7 +212,7 @@ func needsWarning(dir string) bool {
 		filepath.Join(home, "Library"),
 	}
 	for _, d := range warnDirs {
-		if dir == d {
+		if dir == filepath.Clean(d) {
 			return true
 		}
 	}

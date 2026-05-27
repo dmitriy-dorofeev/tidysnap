@@ -15,7 +15,10 @@ func TestNewResetModel(t *testing.T) {
 func TestUpdateReset_Yes(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenResetConfirm
 	m.resetModel = newResetModel()
@@ -31,7 +34,10 @@ func TestUpdateReset_Yes(t *testing.T) {
 
 func TestUpdateReset_No(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenResetConfirm
 	m.resetModel = newResetModel()
@@ -45,7 +51,11 @@ func TestUpdateReset_No(t *testing.T) {
 
 func TestResetView(t *testing.T) {
 	m := InitialModel()
-	m.cfg = config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
 	m.screen = screenResetConfirm
 	m.width = 80
 	m.height = 24

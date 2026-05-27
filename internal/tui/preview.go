@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
+	"github.com/dustin/go-humanize"
 )
 
 type previewItem struct {
@@ -19,7 +21,11 @@ type previewItem struct {
 
 func (i previewItem) Title() string { return i.file.Path }
 func (i previewItem) Description() string {
-	return fmt.Sprintf("%s | %s", i.file.ModTime.Format("2006-01-02"), humanizeBytes(i.file.Size))
+	size := uint64(i.file.Size)
+	if i.file.Size < 0 {
+		size = 0
+	}
+	return fmt.Sprintf("%s | %s", i.file.ModTime.Format("2006-01-02"), humanize.Bytes(size))
 }
 func (i previewItem) FilterValue() string { return i.file.Path }
 
@@ -30,7 +36,7 @@ type previewModel struct {
 }
 
 func newPreviewModel(width, height int, files []scanner.ScanResult, dryRun bool) previewModel {
-	var items []list.Item
+	items := make([]list.Item, 0, len(files))
 	for _, f := range files {
 		items = append(items, previewItem{file: f})
 	}
@@ -73,7 +79,7 @@ func (m model) runCleanup() (tea.Model, tea.Cmd) {
 
 		logger := log.New(logFile, "", log.LstdFlags)
 		c := cleaner.New(m.cfg.DryRun, logger)
-		stats, err := c.Clean(m.previewModel.files)
+		stats, err := c.Clean(context.Background(), m.previewModel.files)
 		if err != nil {
 			return errMsg{err}
 		}

@@ -58,7 +58,10 @@ func TestUpdateLogView_Esc(t *testing.T) {
 func TestLogViewInit(t *testing.T) {
 	setTestHome(t)
 	// Create a log file
-	logPath := config.LogPath()
+	logPath, err := config.LogPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	os.MkdirAll(filepath.Dir(logPath), 0755)
 	os.WriteFile(logPath, []byte("test log"), 0644)
 

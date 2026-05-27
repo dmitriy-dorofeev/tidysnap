@@ -1,21 +1,33 @@
 package tui
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
+	"github.com/dustin/go-humanize"
 )
+
+type daemonStatus struct {
+	installed  bool
+	running    bool
+	loaded     bool
+	nextRun    time.Time
+	hasNextRun bool
+}
 
 type statusModel struct {
 	width  int
 	height int
 	cfg    *config.Config
 	msg    string
+	status daemonStatus
 }
 
 func newStatusModel(width, height int, cfg *config.Config) statusModel {
@@ -37,25 +49,7 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.folderPickerModel = newFolderPickerModel(m.width, m.height, m.cfg.TargetDir, screenStatus)
 			return m, m.folderPickerModel.Init()
 		case "s":
-			switch {
-			case !daemon.IsInstalled():
-				if err := daemon.Install(daemon.BinaryPath(), m.cfg.CheckIntervalHours); err != nil {
-					m.statusModel.msg = fmt.Sprintf("Ошибка установки: %v", err)
-				}
-			case daemon.IsRunning():
-				if err := daemon.Stop(); err != nil {
-					m.statusModel.msg = fmt.Sprintf("Ошибка остановки: %v", err)
-				}
-			case daemon.IsLoaded():
-				if err := daemon.Start(); err != nil {
-					m.statusModel.msg = fmt.Sprintf("Ошибка запуска: %v", err)
-				}
-			default:
-				if err := daemon.Load(); err != nil {
-					m.statusModel.msg = fmt.Sprintf("Ошибка загрузки: %v", err)
-				}
-			}
-			return m, nil
+			return m, m.daemonActionCmd()
 		case "x":
 			m.screen = screenResetConfirm
 			m.resetModel = newResetModel()
@@ -69,8 +63,14 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.previewModel.Init()
 	case cleanupDoneMsg:
 		m.statusModel.msg = fmt.Sprintf("Очистка завершена: удалено %d файлов, освобождено %s",
-			msg.stats.FilesRemoved, humanizeBytes(msg.stats.BytesFreed))
+			msg.stats.FilesRemoved, humanize.Bytes(safeUint64(msg.stats.BytesFreed)))
 		m.screen = screenStatus
+		return m, nil
+	case daemonStatusMsg:
+		m.statusModel.status = msg.status
+		if msg.errMsg != "" {
+			m.statusModel.msg = msg.errMsg
+		}
 		return m, nil
 	}
 	return m, nil
@@ -79,12 +79,55 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) runScan() (tea.Model, tea.Cmd) {
 	return m, func() tea.Msg {
 		s := scanner.New(m.cfg.Extensions, m.cfg.RetentionDays)
-		files, err := s.Scan(m.cfg.TargetDir)
+		files, err := s.Scan(context.Background(), m.cfg.TargetDir)
 		if err != nil {
 			return errMsg{err}
 		}
 		return scanDoneMsg{files}
 	}
+}
+
+func (m model) daemonActionCmd() tea.Cmd {
+	return func() tea.Msg {
+		var errMsg string
+		switch {
+		case !daemon.IsInstalled():
+			if err := daemon.Install(daemon.BinaryPath(), m.cfg.CheckIntervalHours); err != nil {
+				errMsg = fmt.Sprintf("Ошибка установки: %v", err)
+			}
+		case daemon.IsRunning():
+			if err := daemon.Stop(); err != nil {
+				errMsg = fmt.Sprintf("Ошибка остановки: %v", err)
+			}
+		case daemon.IsLoaded():
+			if err := daemon.Start(); err != nil {
+				errMsg = fmt.Sprintf("Ошибка запуска: %v", err)
+			}
+		default:
+			if err := daemon.Load(); err != nil {
+				errMsg = fmt.Sprintf("Ошибка загрузки: %v", err)
+			}
+		}
+		return daemonStatusMsg{status: getDaemonStatus(m.cfg.CheckIntervalHours), errMsg: errMsg}
+	}
+}
+
+func getDaemonStatus(intervalHours int) daemonStatus {
+	s := daemonStatus{
+		installed: daemon.IsInstalled(),
+		running:   daemon.IsRunning(),
+		loaded:    daemon.IsLoaded(),
+	}
+	if nextRun, ok := daemon.NextRunTime(intervalHours); ok {
+		s.nextRun = nextRun
+		s.hasNextRun = true
+	}
+	return s
+}
+
+type daemonStatusMsg struct {
+	status daemonStatus
+	errMsg string
 }
 
 func (m model) statusView() string {
@@ -95,16 +138,18 @@ func (m model) statusView() string {
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1)
 	msgStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("220")).MarginTop(1)
 
-	var status string
+	status := m.statusModel.status
+
+	var statusStr string
 	switch {
-	case !daemon.IsInstalled():
-		status = "❌ Не установлен"
-	case daemon.IsRunning():
-		status = "✅ Выполняется"
-	case daemon.IsLoaded():
-		status = "⏳ Установлен (запустится по расписанию)"
+	case !status.installed:
+		statusStr = "❌ Не установлен"
+	case status.running:
+		statusStr = "✅ Выполняется"
+	case status.loaded:
+		statusStr = "⏳ Установлен (запустится по расписанию)"
 	default:
-		status = "⏸️  Установлен, но выгружен"
+		statusStr = "⏸️  Установлен, но выгружен"
 	}
 
 	lines := []string{
@@ -112,11 +157,11 @@ func (m model) statusView() string {
 		fmt.Sprintf("%s %s", labelStyle.Render("Расширения:"), valueStyle.Render(strings.Join(m.cfg.Extensions, ", "))),
 		fmt.Sprintf("%s %d дней", labelStyle.Render("Срок хранения:"), m.cfg.RetentionDays),
 		fmt.Sprintf("%s %s", labelStyle.Render("Тестовый режим:"), valueStyle.Render(map[bool]string{true: "Да", false: "Нет"}[m.cfg.DryRun])),
-		fmt.Sprintf("%s %s", labelStyle.Render("Демон:"), valueStyle.Render(status)),
+		fmt.Sprintf("%s %s", labelStyle.Render("Демон:"), valueStyle.Render(statusStr)),
 	}
 
-	if nextRun, ok := daemon.NextRunTime(m.cfg.CheckIntervalHours); ok {
-		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render("Следующий запуск:"), valueStyle.Render(nextRun.Format("02.01.2006 15:04"))))
+	if status.hasNextRun {
+		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render("Следующий запуск:"), valueStyle.Render(status.nextRun.Format("02.01.2006 15:04"))))
 	}
 
 	if m.statusModel.msg != "" {
@@ -126,11 +171,11 @@ func (m model) statusView() string {
 	box := boxStyle.Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
 	var daemonHint string
 	switch {
-	case !daemon.IsInstalled():
+	case !status.installed:
 		daemonHint = "[s] Установить демон"
-	case daemon.IsRunning():
+	case status.running:
 		daemonHint = "[s] Остановить демон"
-	case daemon.IsLoaded():
+	case status.loaded:
 		daemonHint = "[s] Запустить сейчас"
 	default:
 		daemonHint = "[s] Загрузить демон"
@@ -143,15 +188,9 @@ func (m model) statusView() string {
 	)
 }
 
-func humanizeBytes(b int64) string {
-	const unit = 1024
-	if b < unit {
-		return fmt.Sprintf("%d B", b)
+func safeUint64(n int64) uint64 {
+	if n < 0 {
+		return 0
 	}
-	div, exp := int64(unit), 0
-	for n := b / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "KMGTPE"[exp])
+	return uint64(n)
 }

@@ -10,7 +10,10 @@ import (
 func TestUpdateWarning_Yes(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.TargetDir = "/tmp"
 	m.cfg = cfg
 	m.screen = screenWarning
@@ -33,7 +36,10 @@ func TestUpdateWarning_Yes(t *testing.T) {
 func TestUpdateWarning_No(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenWarning
 	m.warningModel = newWarningModel("/tmp", []string{".png"}, 30)
@@ -52,7 +58,10 @@ func TestUpdateWarning_No(t *testing.T) {
 
 func TestUpdateWarning_UnknownKey(t *testing.T) {
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	m.cfg = cfg
 	m.screen = screenWarning
 	m.warningModel = newWarningModel("/tmp", []string{".png"}, 30)
@@ -66,7 +75,11 @@ func TestUpdateWarning_UnknownKey(t *testing.T) {
 
 func TestWarningView(t *testing.T) {
 	m := InitialModel()
-	m.cfg = config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
 	m.cfg.TargetDir = "/tmp"
 	m.width = 80
 	m.height = 24

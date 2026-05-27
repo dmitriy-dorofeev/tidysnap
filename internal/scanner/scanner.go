@@ -1,7 +1,8 @@
 package scanner
 
 import (
-	"os"
+	"context"
+	"io/fs"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -13,13 +14,6 @@ type ScanResult struct {
 	Size    int64
 	ModTime time.Time
 	Ext     string
-}
-
-type CleanupStats struct {
-	FilesRemoved int
-	BytesFreed   int64
-	Errors       []string
-	Timestamp    time.Time
 }
 
 type Scanner struct {
@@ -38,17 +32,27 @@ func New(extensions []string, retentionDays int) *Scanner {
 	}
 }
 
-func (s *Scanner) Scan(targetDir string) ([]ScanResult, error) {
+func (s *Scanner) Scan(ctx context.Context, targetDir string) ([]ScanResult, error) {
 	var results []ScanResult
 
-	err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.WalkDir(targetDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			if path == targetDir {
 				return err
 			}
 			return nil
 		}
-		if info.IsDir() {
+
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		info, err := d.Info()
+		if err != nil {
 			return nil
 		}
 

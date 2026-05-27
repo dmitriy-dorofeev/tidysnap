@@ -123,7 +123,11 @@ func TestUpdateFolderPicker_Select(t *testing.T) {
 	os.MkdirAll(sub, 0755)
 
 	m := InitialModel()
-	m.cfg = config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
 	m.screen = screenFolderPicker
 	m.folderPickerModel = newFolderPickerModel(80, 24, tmp, screenWelcome)
 	m.folderPickerModel.items = []dirItem{{name: "sub", path: sub}}
@@ -192,7 +196,11 @@ func TestUpdateFolderPicker_FolderPickerErrorMsg(t *testing.T) {
 func TestUpdateFolderPicker_FolderSelectedMsg(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	m.cfg = config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg = cfg
 	m.screen = screenFolderPicker
 	m.folderPickerModel = newFolderPickerModel(80, 24, "/tmp", screenWelcome)
 

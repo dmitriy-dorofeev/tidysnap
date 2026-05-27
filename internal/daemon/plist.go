@@ -9,6 +9,11 @@ import (
 )
 
 func GeneratePlist(label, binaryPath string, intervalHours int) string {
+	logDir, err := config.LogDir()
+	if err != nil {
+		logDir = filepath.Join(os.Getenv("HOME"), "Library", "Logs", "tidysnap")
+	}
+
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -33,13 +38,16 @@ func GeneratePlist(label, binaryPath string, intervalHours int) string {
 		label,
 		binaryPath,
 		intervalHours*3600,
-		filepath.Join(os.Getenv("HOME"), "Library", "Logs", "tidysnap", "stdout.log"),
-		filepath.Join(os.Getenv("HOME"), "Library", "Logs", "tidysnap", "stderr.log"),
+		filepath.Join(logDir, "stdout.log"),
+		filepath.Join(logDir, "stderr.log"),
 	)
 }
 
 func WritePlist(content string) error {
-	path := config.PlistPath()
+	path, err := config.PlistPath()
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0750); err != nil {
 		return err
 	}
@@ -47,5 +55,9 @@ func WritePlist(content string) error {
 }
 
 func RemovePlist() error {
-	return os.Remove(config.PlistPath())
+	path, err := config.PlistPath()
+	if err != nil {
+		return err
+	}
+	return os.Remove(path)
 }

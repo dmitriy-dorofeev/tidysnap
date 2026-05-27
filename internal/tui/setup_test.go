@@ -57,7 +57,10 @@ func TestParseInt(t *testing.T) {
 }
 
 func TestNewSetupModel(t *testing.T) {
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.Extensions = []string{".png", ".jpg"}
 	cfg.RetentionDays = 7
 	cfg.CheckIntervalHours = 12
@@ -73,7 +76,11 @@ func TestNewSetupModel(t *testing.T) {
 
 func TestSetupView(t *testing.T) {
 	m := InitialModel()
-	m.setupModel = newSetupModel(80, 24, config.DefaultConfig())
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.setupModel = newSetupModel(80, 24, cfg)
 	view := m.setupView()
 	if view == "" {
 		t.Error("setupView should not be empty")
@@ -83,7 +90,10 @@ func TestSetupView(t *testing.T) {
 func TestUpdateSetup_FormCompleted(t *testing.T) {
 	setTestHome(t)
 	m := InitialModel()
-	cfg := config.DefaultConfig()
+	cfg, err := config.DefaultConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.TargetDir = "/tmp/testdir"
 	m.cfg = cfg
 	m.width = 80

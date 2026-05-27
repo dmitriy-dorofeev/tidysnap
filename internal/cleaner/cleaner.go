@@ -1,6 +1,7 @@
 package cleaner
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +10,13 @@ import (
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dustin/go-humanize"
 )
+
+type CleanupStats struct {
+	FilesRemoved int
+	BytesFreed   int64
+	Errors       []string
+	Timestamp    time.Time
+}
 
 type Cleaner struct {
 	dryRun bool
@@ -26,10 +34,14 @@ func safeUint64(n int64) uint64 {
 	return uint64(n)
 }
 
-func (c *Cleaner) Clean(files []scanner.ScanResult) (*scanner.CleanupStats, error) {
-	stats := &scanner.CleanupStats{Timestamp: time.Now()}
+func (c *Cleaner) Clean(ctx context.Context, files []scanner.ScanResult) (*CleanupStats, error) {
+	stats := &CleanupStats{Timestamp: time.Now()}
 
 	for _, file := range files {
+		if err := ctx.Err(); err != nil {
+			return stats, err
+		}
+
 		if c.dryRun {
 			c.logger.Printf("[DRY RUN] Would delete: %s (%s)", file.Path, humanize.Bytes(safeUint64(file.Size)))
 			stats.FilesRemoved++

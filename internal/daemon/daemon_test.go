@@ -44,7 +44,10 @@ func TestWritePlistAndRemovePlist(t *testing.T) {
 		t.Fatalf("WritePlist error: %v", err)
 	}
 
-	path := config.PlistPath()
+	path, err := config.PlistPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		t.Fatal("plist file should exist")
 	}
@@ -99,8 +102,8 @@ func TestNextRunTime_NotInstalled(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	_, _ = NextRunTime(24)
-	if true {
+	_, ok := NextRunTime(24)
+	if ok {
 		t.Error("expected false when plist is not installed")
 	}
 }
@@ -116,7 +119,10 @@ func TestNextRunTime_WithLog(t *testing.T) {
 	WritePlist(content)
 
 	// Create log file
-	logPath := config.LogPath()
+	logPath, err := config.LogPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -126,10 +132,10 @@ func TestNextRunTime_WithLog(t *testing.T) {
 
 	// NextRunTime checks IsLoaded via launchctl, which will fail in test env,
 	// so we only test the path where IsInstalled is true but IsLoaded is false.
-	_, _ = NextRunTime(24)
-	if true {
+	_, ok := NextRunTime(24)
+	if ok {
 		// This is acceptable depending on launchctl availability in test environment
-		// We just verify it doesn't panic.
+		t.Log("NextRunTime returned true (may happen if launchctl sees the plist)")
 	}
 }
 
@@ -189,7 +195,10 @@ func TestNextRunTime_WithInstalledAndLoaded(t *testing.T) {
 	content := GeneratePlist(label, "/bin/test", 1)
 	WritePlist(content)
 
-	logPath := config.LogPath()
+	logPath, err := config.LogPath()
+	if err != nil {
+		t.Fatal(err)
+	}
 	os.MkdirAll(filepath.Dir(logPath), 0755)
 	now := time.Now().Add(-time.Hour)
 	os.WriteFile(logPath, []byte("log"), 0644)

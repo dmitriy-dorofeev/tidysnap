@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,7 +30,7 @@ func TestNew(t *testing.T) {
 func TestScan_EmptyDir(t *testing.T) {
 	tmp := t.TempDir()
 	s := New([]string{".png"}, 0)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -56,7 +57,7 @@ func TestScan_MatchingFiles(t *testing.T) {
 	}
 
 	s := New([]string{".png"}, 30)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -79,7 +80,7 @@ func TestScan_SkipsRecentFiles(t *testing.T) {
 	}
 	// File is brand new, retention is 30 days
 	s := New([]string{".png"}, 30)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -105,7 +106,7 @@ func TestScan_NestedDirs(t *testing.T) {
 	}
 
 	s := New([]string{".jpg"}, 30)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -130,7 +131,7 @@ func TestScan_SkipsNonMatchingExtensions(t *testing.T) {
 	}
 
 	s := New([]string{".png"}, 0)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -147,7 +148,7 @@ func TestScan_SkipsDirs(t *testing.T) {
 	}
 
 	s := New([]string{".png"}, 0)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -158,7 +159,7 @@ func TestScan_SkipsDirs(t *testing.T) {
 
 func TestScan_NonExistentDir(t *testing.T) {
 	s := New([]string{".png"}, 0)
-	_, err := s.Scan("/nonexistent/path/12345")
+	_, err := s.Scan(context.Background(), "/nonexistent/path/12345")
 	if err == nil {
 		t.Fatal("expected error for non-existent directory")
 	}
@@ -186,7 +187,7 @@ func TestScan_SkipsInaccessibleNestedDir(t *testing.T) {
 	defer os.Chmod(nested, 0755) // cleanup
 
 	s := New([]string{".png"}, 0)
-	results, err := s.Scan(tmp)
+	results, err := s.Scan(context.Background(), tmp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

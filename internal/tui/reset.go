@@ -24,7 +24,12 @@ func (m model) updateReset(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter", "y":
 			_ = daemon.Uninstall()
 			_ = config.Cleanup()
-			m.cfg = config.DefaultConfig()
+			cfg, err := config.DefaultConfig()
+			if err != nil {
+				m.err = err
+				return m, nil
+			}
+			m.cfg = cfg
 			m.screen = screenWelcome
 			m.welcomeModel = newWelcomeModel(m.width, m.height)
 			return m, nil
@@ -46,6 +51,10 @@ func (m model) resetView() string {
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1)
 	boldStyle := lipgloss.NewStyle().Bold(true)
 
+	configPath, _ := config.ConfigPath()
+	logDir, _ := config.LogDir()
+	plistPath, _ := config.PlistPath()
+
 	content := fmt.Sprintf(
 		"Будут удалены все файлы и настройки TidySnap:\n\n"+
 			"• %s\n"+
@@ -53,9 +62,9 @@ func (m model) resetView() string {
 			"• %s\n\n"+
 			"Демон будет остановлен и выгружен.\n\n"+
 			"Это действие %s.",
-		boldStyle.Render(config.ConfigPath()),
-		boldStyle.Render(config.LogDir()),
-		boldStyle.Render(config.PlistPath()),
+		boldStyle.Render(configPath),
+		boldStyle.Render(logDir),
+		boldStyle.Render(plistPath),
 		boldStyle.Render("нельзя отменить"),
 	)
 
