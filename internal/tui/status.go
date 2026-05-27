@@ -33,9 +33,9 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.logViewModel = newLogViewModel(m.width, m.height)
 			return m, m.logViewModel.Init()
 		case "e":
-			m.screen = screenSetup
-			m.setupModel = newSetupModel(m.width, m.height, m.cfg)
-			return m, m.setupModel.Init()
+			m.screen = screenFolderPicker
+			m.folderPickerModel = newFolderPickerModel(m.width, m.height, m.cfg.TargetDir, screenStatus)
+			return m, m.folderPickerModel.Init()
 		case "s":
 			switch {
 			case !daemon.IsInstalled():

@@ -30,7 +30,7 @@ func (m model) updateWelcome(msg tea.Msg) (tea.Model, tea.Cmd) {
 				home, _ := os.UserHomeDir()
 				startDir = home
 			}
-			m.folderPickerModel = newFolderPickerModel(m.width, m.height, startDir)
+			m.folderPickerModel = newFolderPickerModel(m.width, m.height, startDir, screenWelcome)
 			return m, m.folderPickerModel.Init()
 		case "q", "esc":
 			return m, tea.Quit

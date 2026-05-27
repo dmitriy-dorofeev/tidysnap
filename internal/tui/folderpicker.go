@@ -17,12 +17,13 @@ type dirItem struct {
 }
 
 type folderPickerModel struct {
-	width  int
-	height int
-	cwd    string
-	home   string
-	items  []dirItem
-	cursor int
+	width        int
+	height       int
+	cwd          string
+	home         string
+	items        []dirItem
+	cursor       int
+	returnScreen screen
 }
 
 type folderPickerLoadedMsg struct {
@@ -39,18 +40,19 @@ type folderSelectedMsg struct {
 
 type folderPickerBackMsg struct{}
 
-func newFolderPickerModel(width, height int, startDir string) folderPickerModel {
+func newFolderPickerModel(width, height int, startDir string, returnScreen screen) folderPickerModel {
 	home, _ := os.UserHomeDir()
 	if startDir == "" {
 		startDir = home
 	}
 	return folderPickerModel{
-		width:  width,
-		height: height,
-		cwd:    startDir,
-		home:   home,
-		items:  nil,
-		cursor: 0,
+		width:        width,
+		height:       height,
+		cwd:          startDir,
+		home:         home,
+		items:        nil,
+		cursor:       0,
+		returnScreen: returnScreen,
 	}
 }
 
@@ -103,13 +105,13 @@ func (m model) updateFolderPicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.setupModel.Init()
 
 	case folderPickerBackMsg:
-		m.screen = screenWelcome
+		m.screen = m.folderPickerModel.returnScreen
 		return m, nil
 
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc":
-			m.screen = screenWelcome
+			m.screen = m.folderPickerModel.returnScreen
 			return m, nil
 		case "up", "k":
 			if m.folderPickerModel.cursor > 0 {
