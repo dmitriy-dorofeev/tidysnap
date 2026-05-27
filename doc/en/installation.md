@@ -3,10 +3,22 @@
 ## Requirements
 
 - **macOS** (the utility uses `launchd` for background operation)
-- **Go 1.26+**
-- **make** (optional, for convenience)
+
+## Install via Homebrew (recommended)
+
+```bash
+brew tap dmitriy-dorofeev/tap
+brew install tidysnap
+```
+
+This is the easiest way to install and keep `tidysnap` up to date.
 
 ## Build from Source
+
+### Requirements
+
+- **Go 1.26+**
+- **make** (optional, for convenience)
 
 ```bash
 # Clone the repository
@@ -20,7 +32,7 @@ make build
 go build -ldflags "-s -w" -o bin/tidysnap ./cmd/main.go
 ```
 
-## Install into the System
+### Install into the System
 
 ```bash
 make install

@@ -47,3 +47,20 @@ changelog:
       - '^chore:'
       - Merge pull request
       - Merge branch
+
+brews:
+  - repository:
+      owner: dmitriy-dorofeev
+      name: homebrew-tap
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    directory: Formula
+    homepage: "https://github.com/dmitriy-dorofeev/tidysnap"
+    description: "A macOS utility with a TUI interface for automatic cleanup of screenshots and screen recordings."
+    license: "MIT"
+    install: |
+      bin.install "tidysnap"
+    test: |
+      system "#{bin}/tidysnap", "--version"

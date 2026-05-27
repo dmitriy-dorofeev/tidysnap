@@ -9,13 +9,22 @@ A macOS utility with a TUI interface for automatic cleanup of screenshots and sc
 
 ## Quick Start
 
+### Install via Homebrew (recommended)
+
+```bash
+brew tap dmitriy-dorofeev/tap
+brew install tidysnap
+```
+
+Run `tidysnap` and follow the interactive setup.
+
+### Build from Source
+
 ```bash
 git clone https://github.com/dmitriy-dorofeev/tidysnap.git
 cd tidysnap
 make install
 ```
-
-Run `tidysnap` and follow the interactive setup.
 
 ## Features
 
