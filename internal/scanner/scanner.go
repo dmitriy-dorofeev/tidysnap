@@ -43,6 +43,9 @@ func (s *Scanner) Scan(targetDir string) ([]ScanResult, error) {
 
 	err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			if path == targetDir {
+				return err
+			}
 			return nil
 		}
 		if info.IsDir() {
