@@ -12,6 +12,7 @@ import (
 	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/tui"
 )
@@ -24,11 +25,11 @@ var (
 
 func main() {
 	var (
-		cleanupFlag    = flag.Bool("cleanup", false, "Запустить фоновую очистку (без TUI)")
-		configPathFlag = flag.Bool("config-path", false, "Показать путь к конфигу")
-		resetFlag      = flag.Bool("reset", false, "Сбросить настройки")
-		uninstallFlag  = flag.Bool("uninstall", false, "Удалить plist и конфиг")
-		versionFlag    = flag.Bool("version", false, "Показать версию")
+		cleanupFlag    = flag.Bool("cleanup", false, i18n.T("flag_cleanup"))
+		configPathFlag = flag.Bool("config-path", false, i18n.T("flag_config_path"))
+		resetFlag      = flag.Bool("reset", false, i18n.T("flag_reset"))
+		uninstallFlag  = flag.Bool("uninstall", false, i18n.T("flag_uninstall"))
+		versionFlag    = flag.Bool("version", false, i18n.T("flag_version"))
 	)
 	flag.Parse()
 
@@ -40,7 +41,7 @@ func main() {
 	if *configPathFlag {
 		path, err := config.ConfigPath()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Ошибка: %v\n", err)
+			fmt.Fprintf(os.Stderr, i18n.T("err_generic"), err)
 			os.Exit(1)
 		}
 		fmt.Println(path)
@@ -49,28 +50,28 @@ func main() {
 
 	if *resetFlag {
 		if err := config.Reset(); err != nil {
-			fmt.Fprintf(os.Stderr, "Ошибка сброса: %v\n", err)
+			fmt.Fprintf(os.Stderr, i18n.T("err_reset"), err)
 			os.Exit(1)
 		}
-		fmt.Println("Настройки сброшены.")
+		fmt.Println(i18n.T("settings_reset"))
 		return
 	}
 
 	if *uninstallFlag {
 		if err := daemon.Uninstall(); err != nil {
-			fmt.Fprintf(os.Stderr, "Ошибка удаления: %v\n", err)
+			fmt.Fprintf(os.Stderr, i18n.T("err_uninstall"), err)
 			os.Exit(1)
 		}
 		if err := config.Reset(); err != nil {
-			fmt.Fprintf(os.Stderr, "Ошибка удаления конфига: %v\n", err)
+			fmt.Fprintf(os.Stderr, i18n.T("err_uninstall_config"), err)
 		}
-		fmt.Println("TidySnap удалён.")
+		fmt.Println(i18n.T("tidysnap_removed"))
 		return
 	}
 
 	if *cleanupFlag {
 		if err := runCleanup(); err != nil {
-			fmt.Fprintf(os.Stderr, "Ошибка очистки: %v\n", err)
+			fmt.Fprintf(os.Stderr, i18n.T("err_cleanup"), err)
 			os.Exit(1)
 		}
 		return
@@ -79,7 +80,7 @@ func main() {
 	// TUI mode
 	p := tea.NewProgram(tui.InitialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка запуска TUI: %v\n", err)
+		fmt.Fprintf(os.Stderr, i18n.T("err_tui"), err)
 		os.Exit(1)
 	}
 }
@@ -87,16 +88,16 @@ func main() {
 func runCleanup() error {
 	cfg, err := config.Load()
 	if err != nil {
-		return fmt.Errorf("ошибка загрузки конфига: %w", err)
+		return fmt.Errorf(i18n.T("err_load_config"), err)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(cfg.LogPath), 0750); err != nil {
-		return fmt.Errorf("ошибка создания папки логов: %w", err)
+		return fmt.Errorf(i18n.T("err_log_dir"), err)
 	}
 
 	logFile, err := os.OpenFile(cfg.LogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		return fmt.Errorf("ошибка открытия лога: %w", err)
+		return fmt.Errorf(i18n.T("err_open_log"), err)
 	}
 	defer logFile.Close()
 
@@ -107,13 +108,13 @@ func runCleanup() error {
 	s := scanner.New(cfg.Extensions, cfg.RetentionDays)
 	files, err := s.Scan(ctx, cfg.TargetDir)
 	if err != nil {
-		return fmt.Errorf("ошибка сканирования: %w", err)
+		return fmt.Errorf(i18n.T("err_scan"), err)
 	}
 
 	c := cleaner.New(cfg.DryRun, logger)
 	stats, err := c.Clean(ctx, files)
 	if err != nil {
-		return fmt.Errorf("ошибка очистки: %w", err)
+		return fmt.Errorf(i18n.T("err_clean"), err)
 	}
 
 	logger.Printf("Cleanup complete: removed %d files, freed %d bytes", stats.FilesRemoved, stats.BytesFreed)

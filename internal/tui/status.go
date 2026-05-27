@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dustin/go-humanize"
 )
@@ -31,7 +32,7 @@ type statusModel struct {
 }
 
 func newStatusModel(width, height int, cfg *config.Config) statusModel {
-	return statusModel{width: width, height: height, cfg: cfg}
+	return statusModel{width: width, height: height, cfg: cfg, status: getDaemonStatus(cfg.CheckIntervalHours)}
 }
 
 func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -143,25 +144,25 @@ func (m model) statusView() string {
 	var statusStr string
 	switch {
 	case !status.installed:
-		statusStr = "❌ Не установлен"
+		statusStr = i18n.T("status_not_installed")
 	case status.running:
-		statusStr = "✅ Выполняется"
+		statusStr = i18n.T("status_running")
 	case status.loaded:
-		statusStr = "⏳ Установлен (запустится по расписанию)"
+		statusStr = i18n.T("status_loaded")
 	default:
-		statusStr = "⏸️  Установлен, но выгружен"
+		statusStr = i18n.T("status_unloaded")
 	}
 
 	lines := []string{
-		fmt.Sprintf("%s %s", labelStyle.Render("Папка:"), valueStyle.Render(m.cfg.TargetDir)),
-		fmt.Sprintf("%s %s", labelStyle.Render("Расширения:"), valueStyle.Render(strings.Join(m.cfg.Extensions, ", "))),
-		fmt.Sprintf("%s %d дней", labelStyle.Render("Срок хранения:"), m.cfg.RetentionDays),
-		fmt.Sprintf("%s %s", labelStyle.Render("Тестовый режим:"), valueStyle.Render(map[bool]string{true: "Да", false: "Нет"}[m.cfg.DryRun])),
-		fmt.Sprintf("%s %s", labelStyle.Render("Демон:"), valueStyle.Render(statusStr)),
+		fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_folder")), valueStyle.Render(m.cfg.TargetDir)),
+		fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_extensions")), valueStyle.Render(strings.Join(m.cfg.Extensions, ", "))),
+		fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_retention")), valueStyle.Render(fmt.Sprintf(i18n.T("label_retention_days"), m.cfg.RetentionDays))),
+		fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_dryrun")), valueStyle.Render(map[bool]string{true: i18n.T("yes"), false: i18n.T("no")}[m.cfg.DryRun])),
+		fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_daemon")), valueStyle.Render(statusStr)),
 	}
 
 	if status.hasNextRun {
-		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render("Следующий запуск:"), valueStyle.Render(status.nextRun.Format("02.01.2006 15:04"))))
+		lines = append(lines, fmt.Sprintf("%s %s", labelStyle.Render(i18n.T("label_next_run")), valueStyle.Render(status.nextRun.Format("02.01.2006 15:04"))))
 	}
 
 	if m.statusModel.msg != "" {
@@ -172,19 +173,19 @@ func (m model) statusView() string {
 	var daemonHint string
 	switch {
 	case !status.installed:
-		daemonHint = "[s] Установить демон"
+		daemonHint = i18n.T("hint_install")
 	case status.running:
-		daemonHint = "[s] Остановить демон"
+		daemonHint = i18n.T("hint_stop")
 	case status.loaded:
-		daemonHint = "[s] Запустить сейчас"
+		daemonHint = i18n.T("hint_start")
 	default:
-		daemonHint = "[s] Загрузить демон"
+		daemonHint = i18n.T("hint_load")
 	}
-	hints := hintStyle.Render("[r] Запустить очистку  [l] Логи  [e] Настройки  " + daemonHint + "  [x] Удалить  [q] Выход")
+	hints := hintStyle.Render(fmt.Sprintf(i18n.T("status_hints"), daemonHint))
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,
-		lipgloss.JoinVertical(lipgloss.Center, titleStyle.Render("📊 TidySnap — Статус"), box, hints),
+		lipgloss.JoinVertical(lipgloss.Center, titleStyle.Render(i18n.T("status_title")), box, hints),
 	)
 }
 

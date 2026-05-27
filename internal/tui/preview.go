@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dustin/go-humanize"
 )
@@ -43,7 +44,7 @@ func newPreviewModel(width, height int, files []scanner.ScanResult, dryRun bool)
 	}
 
 	l := list.New(items, list.NewDefaultDelegate(), width-4, height-8)
-	l.Title = "Файлы на удаление"
+	l.Title = i18n.T("preview_title")
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.KeyMap.Quit = key.NewBinding(key.WithKeys("esc", "q"))
@@ -90,16 +91,16 @@ func (m model) runCleanup() (tea.Model, tea.Cmd) {
 
 func (m model) previewView() string {
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1)
-	action := "Удалить"
+	action := i18n.T("preview_delete")
 	if m.cfg.DryRun {
-		action = "Показать (Dry Run)"
+		action = i18n.T("preview_dryrun")
 	}
-	hints := hintStyle.Render(fmt.Sprintf("[d/Enter] %s  [Esc/q] Назад", action))
+	hints := hintStyle.Render(fmt.Sprintf(i18n.T("preview_hints"), action))
 
 	if len(m.previewModel.files) == 0 {
 		emptyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center,
-			lipgloss.JoinVertical(lipgloss.Center, emptyStyle.Render("Нет файлов для удаления"), hints))
+			lipgloss.JoinVertical(lipgloss.Center, emptyStyle.Render(i18n.T("preview_empty")), hints))
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, m.previewModel.list.View(), hints)

@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 type setupModel struct {
@@ -23,26 +24,26 @@ func newSetupModel(width, height int, cfg *config.Config) setupModel {
 		huh.NewGroup(
 			huh.NewInput().
 				Key("extensions").
-				Title("Расширения файлов").
-				Description("Через запятую, например: .png, .mov, .mp4").
+				Title(i18n.T("setup_extensions")).
+				Description(i18n.T("setup_extensions_desc")).
 				Value(&extStr),
 
 			huh.NewInput().
 				Key("retention").
-				Title("Срок хранения (дней)").
-				Description("Файлы старше этого срока будут удалены").
+				Title(i18n.T("setup_retention")).
+				Description(i18n.T("setup_retention_desc")).
 				Value(&retentionStr),
 
 			huh.NewInput().
 				Key("interval").
-				Title("Интервал проверки (часов)").
-				Description("Как часто запускать очистку в фоне").
+				Title(i18n.T("setup_interval")).
+				Description(i18n.T("setup_interval_desc")).
 				Value(&intervalStr),
 
 			huh.NewConfirm().
 				Key("dryrun").
-				Title("Тестовый режим (Dry Run)").
-				Description("Показывать файлы, но не удалять их").
+				Title(i18n.T("setup_dryrun")).
+				Description(i18n.T("setup_dryrun_desc")).
 				Value(&cfg.DryRun),
 		),
 	)

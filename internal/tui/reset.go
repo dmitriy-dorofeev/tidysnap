@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 type resetModel struct{}
@@ -56,25 +57,25 @@ func (m model) resetView() string {
 	plistPath, _ := config.PlistPath()
 
 	content := fmt.Sprintf(
-		"Будут удалены все файлы и настройки TidySnap:\n\n"+
+		i18n.T("reset_text1")+"\n\n"+
 			"• %s\n"+
 			"• %s\n"+
 			"• %s\n\n"+
-			"Демон будет остановлен и выгружен.\n\n"+
-			"Это действие %s.",
+			i18n.T("reset_text2")+"\n\n"+
+			i18n.T("reset_text3"),
 		boldStyle.Render(configPath),
 		boldStyle.Render(logDir),
 		boldStyle.Render(plistPath),
-		boldStyle.Render("нельзя отменить"),
+		boldStyle.Render(i18n.T("reset_irreversible")),
 	)
 
 	box := boxStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
-			titleStyle.Render("⚠️  Удаление TidySnap"),
+			titleStyle.Render(i18n.T("reset_title")),
 			content,
 		),
 	)
-	hints := hintStyle.Render("[y/Enter] Удалить всё  [n/Esc] Отмена")
+	hints := hintStyle.Render(i18n.T("reset_hints"))
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,

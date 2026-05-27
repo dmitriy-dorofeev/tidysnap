@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 type dirItem struct {
@@ -165,12 +166,12 @@ func (m model) folderPickerView() string {
 	parentStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
 	emptyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
 
-	title := titleStyle.Render("📁 Выберите папку для очистки")
-	currentPath := pathStyle.Render("Текущая папка: " + m.folderPickerModel.cwd)
+	title := titleStyle.Render(i18n.T("picker_title"))
+	currentPath := pathStyle.Render(i18n.T("picker_current") + m.folderPickerModel.cwd)
 
 	var lines []string
 	if len(m.folderPickerModel.items) == 0 {
-		lines = append(lines, emptyStyle.Render("(пустая папка)"))
+		lines = append(lines, emptyStyle.Render(i18n.T("picker_empty")))
 	} else {
 		for i, item := range m.folderPickerModel.items {
 			prefix := "  "
@@ -200,7 +201,7 @@ func (m model) folderPickerView() string {
 	}
 
 	listView := strings.Join(lines, "\n")
-	hints := hintStyle.Render("↑/↓ навигация • ← назад • →/Enter открыть • Пробел выбрать • q назад")
+	hints := hintStyle.Render(i18n.T("picker_hints"))
 
 	content := lipgloss.JoinVertical(lipgloss.Left, currentPath, listView)
 	return lipgloss.Place(m.width, m.height,

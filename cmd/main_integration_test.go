@@ -57,6 +57,7 @@ func TestMain_Reset(t *testing.T) {
 
 	cmd := exec.Command("go", "run", ".", "-reset")
 	cmd.Dir = "."
+	cmd.Env = append(os.Environ(), "LC_ALL=ru_RU.UTF-8")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("reset flag failed: %v, output: %s", err, out)

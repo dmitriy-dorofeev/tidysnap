@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 )
 
@@ -150,7 +151,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.err != nil {
-		return fmt.Sprintf("Ошибка: %v\n\nНажмите Esc или Ctrl+C для выхода.", m.err)
+		return fmt.Sprintf(i18n.T("error_screen"), m.err)
 	}
 
 	switch m.screen {
@@ -172,7 +173,7 @@ func (m model) View() string {
 		return m.resetView()
 	}
 
-	return "Загрузка..."
+	return i18n.T("loading")
 }
 
 func containsSystemDir(path string) bool {

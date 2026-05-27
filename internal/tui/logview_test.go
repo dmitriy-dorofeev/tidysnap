@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 func TestNewLogViewModel(t *testing.T) {
@@ -37,8 +38,8 @@ func TestUpdateLogView_EmptyLog(t *testing.T) {
 
 	newM, _ := m.Update(logLoadedMsg{content: ""})
 	m2 := newM.(model)
-	if m2.logViewModel.content != "Лог пуст." {
-		t.Errorf("content = %q, want 'Лог пуст.'", m2.logViewModel.content)
+	if m2.logViewModel.content != i18n.T("log_empty") {
+		t.Errorf("content = %q, want %q", m2.logViewModel.content, i18n.T("log_empty"))
 	}
 }
 

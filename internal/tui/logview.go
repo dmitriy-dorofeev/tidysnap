@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 type logViewModel struct {
@@ -50,7 +51,7 @@ func (m model) updateLogView(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case logLoadedMsg:
 		m.logViewModel.content = msg.content
 		if m.logViewModel.content == "" {
-			m.logViewModel.content = "Лог пуст."
+			m.logViewModel.content = i18n.T("log_empty")
 		}
 		lines := strings.Split(m.logViewModel.content, "\n")
 		if len(lines) > m.logViewModel.viewport.Height {
@@ -59,7 +60,7 @@ func (m model) updateLogView(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.logViewModel.viewport.SetContent(m.logViewModel.content)
 		return m, nil
 	case errMsg:
-		m.logViewModel.content = "Лог пуст или недоступен."
+		m.logViewModel.content = i18n.T("log_unavailable")
 		m.logViewModel.viewport.SetContent(m.logViewModel.content)
 		return m, nil
 	}
@@ -71,6 +72,6 @@ func (m model) updateLogView(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) logView() string {
 	hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	hints := hintStyle.Render("[↑/↓] Прокрутка  [Esc/q] Назад")
+	hints := hintStyle.Render(i18n.T("log_hints"))
 	return lipgloss.JoinVertical(lipgloss.Left, m.logViewModel.viewport.View(), hints)
 }

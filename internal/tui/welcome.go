@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 type welcomeModel struct {
@@ -60,18 +61,18 @@ func (m model) welcomeView() string {
 		Foreground(lipgloss.Color("240")).
 		MarginTop(2)
 
-	title := titleStyle.Render("🧹 Добро пожаловать в TidySnap!")
-	subtitle := subtitleStyle.Render("Автоочистка скриншотов и записей экрана")
+	title := titleStyle.Render(i18n.T("welcome_title"))
+	subtitle := subtitleStyle.Render(i18n.T("welcome_subtitle"))
 
 	content := fmt.Sprintf(
 		"%s\n\n%s\n\n%s",
-		"Эта утилита поможет вам автоматически удалять старые скриншоты и видеозаписи экрана.",
-		"При первом запуске нужно выбрать папку и настроить параметры.",
-		"После настройки TidySnap будет работать в фоне через launchd.",
+		i18n.T("welcome_desc1"),
+		i18n.T("welcome_desc2"),
+		i18n.T("welcome_desc3"),
 	)
 
 	box := boxStyle.Render(content)
-	hints := hintStyle.Render("[s/Enter] Начать настройку  [q] Выход")
+	hints := hintStyle.Render(i18n.T("welcome_hints"))
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,

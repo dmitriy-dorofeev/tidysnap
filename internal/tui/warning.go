@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
 )
 
 type warningModel struct {
@@ -86,28 +87,27 @@ func (m model) warningView() string {
 	exts := strings.Join(m.cfg.Extensions, ", ")
 
 	content := fmt.Sprintf(
-		"Указана папка: %s\n\n"+
-			"Утилита будет удалять ВСЕ файлы с расширениями:\n"+
+		i18n.T("warning_folder")+"\n\n"+
+			i18n.T("warning_text1")+"\n"+
 			"%s\n"+
-			"старше %d дней, независимо от имени файла.\n\n"+
-			"Если в этой папке есть важные файлы — они БУДУТ УДАЛЕНЫ.\n\n"+
+			i18n.T("warning_text2")+"\n\n"+
+			i18n.T("warning_text3")+"\n\n"+
 			"%s\n"+
-			"Используйте отдельную папку только для скриншотов,\n"+
-			"например: ~/Screenshots",
-		boldStyle.Render(m.cfg.TargetDir),
+			i18n.T("warning_text4")+"\n"+
+			i18n.T("warning_text5"),
 		boldStyle.Render(exts),
 		m.cfg.RetentionDays,
-		boldStyle.Render("РЕКОМЕНДАЦИЯ:"),
+		boldStyle.Render(i18n.T("warning_recommend")),
 	)
 
 	box := boxStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
-			titleStyle.Render("⚠️  ВНИМАНИЕ"),
+			titleStyle.Render(i18n.T("warning_title")),
 			content,
 		),
 	)
 
-	hints := hintStyle.Render("[y/Enter] Я понимаю риск, продолжить  [n/Esc] Изменить папку")
+	hints := hintStyle.Render(i18n.T("warning_hints"))
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,
