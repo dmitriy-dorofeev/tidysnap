@@ -7,9 +7,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dimulka/tidysnap/internal/config"
-	"github.com/dimulka/tidysnap/internal/daemon"
-	"github.com/dimulka/tidysnap/internal/scanner"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 )
 
 type statusModel struct {

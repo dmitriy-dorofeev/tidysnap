@@ -8,8 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dimulka/tidysnap/internal/config"
-	"github.com/dimulka/tidysnap/internal/scanner"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 )
 
 type screen int
@@ -24,21 +24,21 @@ const (
 )
 
 type model struct {
-	width   int
-	height  int
-	screen  screen
-	cfg     *config.Config
-	err     error
+	width  int
+	height int
+	screen screen
+	cfg    *config.Config
+	err    error
 
 	spinner spinner.Model
 
 	// Sub-models
-	welcomeModel  welcomeModel
-	setupModel    setupModel
-	warningModel  warningModel
-	statusModel   statusModel
-	previewModel  previewModel
-	logViewModel  logViewModel
+	welcomeModel welcomeModel
+	setupModel   setupModel
+	warningModel warningModel
+	statusModel  statusModel
+	previewModel previewModel
+	logViewModel logViewModel
 }
 
 func InitialModel() model {
@@ -179,5 +179,3 @@ func needsWarning(dir string) bool {
 	}
 	return false
 }
-
-

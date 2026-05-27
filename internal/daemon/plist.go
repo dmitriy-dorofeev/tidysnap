@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dimulka/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 )
 
 func GeneratePlist(label, binaryPath string, intervalHours int) string {

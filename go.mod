@@ -1,4 +1,4 @@
-module github.com/dimulka/tidysnap
+module github.com/dmitriy-dorofeev/tidysnap
 
 go 1.26.3
 

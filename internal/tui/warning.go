@@ -7,8 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dimulka/tidysnap/internal/config"
-	"github.com/dimulka/tidysnap/internal/daemon"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
 )
 
 type warningModel struct {

@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/huh"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/dimulka/tidysnap/internal/config"
+	"github.com/charmbracelet/huh"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 )
 
 type setupModel struct {

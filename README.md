@@ -15,7 +15,7 @@
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/dimulka/tidysnap.git
+git clone https://github.com/dmitriy-dorofeev/tidysnap.git
 cd tidysnap
 
 # Собрать и установить
@@ -46,11 +46,11 @@ tidysnap --version
 
 ## Пути на macOS
 
-| Ресурс | Путь |
-|--------|------|
+| Ресурс | Путь                                                 |
+|--------|------------------------------------------------------|
 | Конфиг | `~/Library/Application Support/tidysnap/config.yaml` |
-| Логи | `~/Library/Logs/tidysnap/` |
-| Plist | `~/Library/LaunchAgents/com.tidysnap.plist` |
+| Логи   | `~/Library/Logs/tidysnap/`                           |
+| Plist  | `~/Library/LaunchAgents/com.tidysnap.plist`          |
 
 ## Безопасность
 

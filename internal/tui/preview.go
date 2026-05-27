@@ -9,16 +9,18 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dimulka/tidysnap/internal/cleaner"
-	"github.com/dimulka/tidysnap/internal/scanner"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 )
 
 type previewItem struct {
 	file scanner.ScanResult
 }
 
-func (i previewItem) Title() string       { return i.file.Path }
-func (i previewItem) Description() string { return fmt.Sprintf("%s | %s", i.file.ModTime.Format("2006-01-02"), humanizeBytes(i.file.Size)) }
+func (i previewItem) Title() string { return i.file.Path }
+func (i previewItem) Description() string {
+	return fmt.Sprintf("%s | %s", i.file.ModTime.Format("2006-01-02"), humanizeBytes(i.file.Size))
+}
 func (i previewItem) FilterValue() string { return i.file.Path }
 
 type previewModel struct {

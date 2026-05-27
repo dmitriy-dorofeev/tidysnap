@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dimulka/tidysnap/internal/scanner"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dustin/go-humanize"
 )
 

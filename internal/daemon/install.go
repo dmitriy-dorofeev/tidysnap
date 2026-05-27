@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/dimulka/tidysnap/internal/config"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 )
 
 const label = "com.tidysnap"
