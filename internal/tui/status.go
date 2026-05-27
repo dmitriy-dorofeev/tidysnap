@@ -51,6 +51,10 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 			return m, nil
+		case "x":
+			m.screen = screenResetConfirm
+			m.resetModel = newResetModel()
+			return m, nil
 		case "q", "esc":
 			return m, tea.Quit
 		}
@@ -116,7 +120,7 @@ func (m model) statusView() string {
 	} else {
 		daemonHint = "[s] Установить демон"
 	}
-	hints := hintStyle.Render("[r] Запустить очистку  [l] Логи  [e] Настройки  " + daemonHint + "  [q] Выход")
+	hints := hintStyle.Render("[r] Запустить очистку  [l] Логи  [e] Настройки  " + daemonHint + "  [x] Удалить  [q] Выход")
 
 	return lipgloss.Place(m.width, m.height,
 		lipgloss.Center, lipgloss.Center,

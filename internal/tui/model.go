@@ -22,6 +22,7 @@ const (
 	screenStatus
 	screenPreview
 	screenLogView
+	screenResetConfirm
 )
 
 type model struct {
@@ -41,6 +42,7 @@ type model struct {
 	statusModel       statusModel
 	previewModel      previewModel
 	logViewModel      logViewModel
+	resetModel        resetModel
 }
 
 func InitialModel() model {
@@ -125,6 +127,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updatePreview(msg)
 	case screenLogView:
 		return m.updateLogView(msg)
+	case screenResetConfirm:
+		return m.updateReset(msg)
 	}
 
 	return m, nil
@@ -150,6 +154,8 @@ func (m model) View() string {
 		return m.previewView()
 	case screenLogView:
 		return m.logView()
+	case screenResetConfirm:
+		return m.resetView()
 	}
 
 	return "Загрузка..."

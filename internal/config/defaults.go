@@ -41,3 +41,10 @@ func PlistPath() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, "Library", "LaunchAgents", "com.tidysnap.plist")
 }
+
+func Cleanup() error {
+	_ = os.RemoveAll(ConfigDir())
+	_ = os.RemoveAll(LogDir())
+	_ = os.Remove(PlistPath())
+	return nil
+}
