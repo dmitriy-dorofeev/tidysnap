@@ -15,6 +15,7 @@
 Файл `config.yaml` в формате YAML:
 
 ```yaml
+language: ru
 target_dir: /Users/username/Desktop
 extensions:
   - .png
@@ -34,6 +35,7 @@ check_interval_hours: 24
 
 | Поле | Тип | По умолчанию | Описание |
 |------|-----|--------------|----------|
+| `language` | `string` | `""` (автоопределение) | Язык интерфейса: `en` или `ru` |
 | `target_dir` | `string` | `~` (домашняя папка) | Целевая директория для сканирования |
 | `extensions` | `[]string` | `.png, .jpg, .jpeg, .mov, .mp4, .gif` | Список расширений файлов для удаления |
 | `retention_days` | `int` | `30` | Файлы старше этого количества дней будут удалены |

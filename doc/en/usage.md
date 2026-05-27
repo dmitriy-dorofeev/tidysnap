@@ -55,6 +55,7 @@ After scanning (`r`), a list of files to be deleted is shown. If **Dry Run** is 
 | `--reset` | Reset settings (delete `config.yaml`) |
 | `--uninstall` | Remove plist, config, and unload daemon |
 | `--version` | Show version, commit, and build date |
+| `--lang` | Force interface language (`en` or `ru`) |
 
 ### Examples
 
@@ -67,6 +68,9 @@ tidysnap --reset
 
 # Full uninstall
 tidysnap --uninstall
+
+# Force Russian language
+tidysnap --lang=ru
 ```
 
 ## Daemon Management (launchd)

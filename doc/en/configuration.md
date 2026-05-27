@@ -15,6 +15,7 @@
 The `config.yaml` file in YAML format:
 
 ```yaml
+language: en
 target_dir: /Users/username/Desktop
 extensions:
   - .png
@@ -34,6 +35,7 @@ check_interval_hours: 24
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
+| `language` | `string` | `""` (auto-detect) | Interface language: `en` or `ru` |
 | `target_dir` | `string` | `~` (home folder) | Target directory for scanning |
 | `extensions` | `[]string` | `.png, .jpg, .jpeg, .mov, .mp4, .gif` | List of file extensions to delete |
 | `retention_days` | `int` | `30` | Files older than this many days will be deleted |

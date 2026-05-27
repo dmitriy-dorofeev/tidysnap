@@ -32,7 +32,7 @@ make install
 - ⚙️ Configure folder, extensions, and retention period via TUI
 - 🧪 Dry Run mode enabled by default
 - 🔄 Background operation via `launchd`
-- 🌐 Automatic English / Russian interface based on system locale
+- 🌐 Automatic English / Russian interface based on system locale (with macOS `defaults read` fallback)
 
 ## Commands
 
@@ -43,6 +43,7 @@ tidysnap --config-path
 tidysnap --reset
 tidysnap --uninstall
 tidysnap --version
+tidysnap --lang=ru    # Force Russian language
 ```
 
 ## Documentation

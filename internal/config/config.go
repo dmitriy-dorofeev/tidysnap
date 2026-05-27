@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	Language           string   `yaml:"language"`
 	TargetDir          string   `yaml:"target_dir"`
 	Extensions         []string `yaml:"extensions"`
 	RetentionDays      int      `yaml:"retention_days"`

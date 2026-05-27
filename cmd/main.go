@@ -30,8 +30,17 @@ func main() {
 		resetFlag      = flag.Bool("reset", false, i18n.T("flag_reset"))
 		uninstallFlag  = flag.Bool("uninstall", false, i18n.T("flag_uninstall"))
 		versionFlag    = flag.Bool("version", false, i18n.T("flag_version"))
+		langFlag       = flag.String("lang", "", i18n.T("flag_lang"))
 	)
 	flag.Parse()
+
+	// Language priority: CLI flag > config > env / system default.
+	cfg, _ := config.Load()
+	if *langFlag != "" {
+		i18n.SetLang(*langFlag)
+	} else if cfg != nil && cfg.Language != "" {
+		i18n.SetLang(cfg.Language)
+	}
 
 	if *versionFlag {
 		fmt.Printf("tidysnap %s (commit: %s, built: %s)\n", version, commit, date)

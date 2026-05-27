@@ -40,6 +40,7 @@ go test ./internal/scanner
 go test ./internal/cleaner
 go test ./internal/config
 go test ./internal/daemon
+go test ./internal/i18n
 go test ./internal/tui
 go test ./cmd
 ```
