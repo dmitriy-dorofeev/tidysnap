@@ -40,20 +40,14 @@ func (m model) updateStatus(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if daemon.IsRunning() {
 				if err := daemon.Stop(); err != nil {
 					m.statusModel.msg = fmt.Sprintf("Ошибка остановки: %v", err)
-				} else {
-					m.statusModel.msg = "Демон остановлен"
 				}
 			} else if daemon.IsInstalled() {
 				if err := daemon.Start(); err != nil {
 					m.statusModel.msg = fmt.Sprintf("Ошибка запуска: %v", err)
-				} else {
-					m.statusModel.msg = "Демон запущен"
 				}
 			} else {
 				if err := daemon.Install(daemon.BinaryPath(), m.cfg.CheckIntervalHours); err != nil {
 					m.statusModel.msg = fmt.Sprintf("Ошибка установки: %v", err)
-				} else {
-					m.statusModel.msg = "Демон установлен и запущен"
 				}
 			}
 			return m, nil

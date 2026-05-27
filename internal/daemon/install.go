@@ -45,8 +45,15 @@ func IsInstalled() bool {
 }
 
 func IsRunning() bool {
-	out, _ := exec.Command("launchctl", "list", label).CombinedOutput()
-	return strings.Contains(string(out), label)
+	out, err := exec.Command("launchctl", "list", label).Output()
+	if err != nil {
+		return false
+	}
+	fields := strings.Fields(string(out))
+	if len(fields) >= 3 && fields[2] == label {
+		return fields[0] != "-" && fields[0] != ""
+	}
+	return false
 }
 
 func Stop() error {
