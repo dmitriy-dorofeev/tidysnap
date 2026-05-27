@@ -26,6 +26,7 @@ func (m logViewModel) Init() tea.Cmd {
 		if err != nil {
 			return errMsg{err}
 		}
+		// #nosec G304 — logPath is an internal log path, not user input.
 		data, err := os.ReadFile(logPath)
 		if err != nil {
 			return errMsg{err}

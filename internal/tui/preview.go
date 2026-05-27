@@ -21,9 +21,10 @@ type previewItem struct {
 
 func (i previewItem) Title() string { return i.file.Path }
 func (i previewItem) Description() string {
-	size := uint64(i.file.Size)
-	if i.file.Size < 0 {
-		size = 0
+	var size uint64
+	if i.file.Size > 0 {
+		// #nosec G115 — size comes from os.FileInfo and negative values are handled above.
+		size = uint64(i.file.Size)
 	}
 	return fmt.Sprintf("%s | %s", i.file.ModTime.Format("2006-01-02"), humanize.Bytes(size))
 }
