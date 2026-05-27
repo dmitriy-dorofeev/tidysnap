@@ -69,9 +69,3 @@ func TestMain_Reset(t *testing.T) {
 		t.Error("config file should be removed after reset")
 	}
 }
-
-func configPathForTest(t *testing.T) string {
-	t.Helper()
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, "Library", "Application Support", "tidysnap", "config.yaml")
-}

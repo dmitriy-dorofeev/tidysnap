@@ -40,10 +40,10 @@ func GeneratePlist(label, binaryPath string, intervalHours int) string {
 
 func WritePlist(content string) error {
 	path := config.PlistPath()
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0750); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(content), 0644)
+	return os.WriteFile(path, []byte(content), 0600)
 }
 
 func RemovePlist() error {

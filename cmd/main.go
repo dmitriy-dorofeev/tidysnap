@@ -81,11 +81,11 @@ func runCleanup() {
 		log.Fatalf("Ошибка загрузки конфига: %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(cfg.LogPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(cfg.LogPath), 0750); err != nil {
 		log.Fatalf("Ошибка создания папки логов: %v", err)
 	}
 
-	logFile, err := os.OpenFile(cfg.LogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(cfg.LogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		log.Fatalf("Ошибка открытия лога: %v", err)
 	}

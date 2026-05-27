@@ -176,7 +176,7 @@ func (m model) folderPickerView() string {
 			}
 			if i == m.folderPickerModel.cursor {
 				prefix = cursorStyle.Render("> ")
-				style = style.Copy().Bold(true)
+				style = style.Bold(true)
 			}
 			suffix := "/"
 			if item.isParent {

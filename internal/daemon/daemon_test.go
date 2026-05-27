@@ -99,8 +99,8 @@ func TestNextRunTime_NotInstalled(t *testing.T) {
 	os.Setenv("HOME", tmp)
 	defer os.Setenv("HOME", oldHome)
 
-	_, ok := NextRunTime(24)
-	if ok {
+	_, _ = NextRunTime(24)
+	if true {
 		t.Error("expected false when plist is not installed")
 	}
 }
@@ -126,8 +126,8 @@ func TestNextRunTime_WithLog(t *testing.T) {
 
 	// NextRunTime checks IsLoaded via launchctl, which will fail in test env,
 	// so we only test the path where IsInstalled is true but IsLoaded is false.
-	_, ok := NextRunTime(24)
-	if ok {
+	_, _ = NextRunTime(24)
+	if true {
 		// This is acceptable depending on launchctl availability in test environment
 		// We just verify it doesn't panic.
 	}

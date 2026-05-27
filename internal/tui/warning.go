@@ -15,11 +15,7 @@ type warningModel struct {
 	targetDir  string
 	extensions []string
 	retention  int
-	confirmed  bool
 }
-
-type warningConfirmedMsg struct{}
-type warningCancelledMsg struct{}
 
 func newWarningModel(targetDir string, extensions []string, retention int) warningModel {
 	return warningModel{
@@ -54,7 +50,7 @@ func (m model) saveAndGoToStatus() (tea.Model, tea.Cmd) {
 		m.err = err
 		return m, nil
 	}
-	if err := os.MkdirAll(config.LogDir(), 0755); err != nil {
+	if err := os.MkdirAll(config.LogDir(), 0750); err != nil {
 		m.err = err
 		return m, nil
 	}

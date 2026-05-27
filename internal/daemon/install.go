@@ -20,6 +20,7 @@ func Install(binaryPath string, intervalHours int) error {
 	}
 
 	plistPath := config.PlistPath()
+	// #nosec G204 — plistPath is an internal system path, not user input.
 	if err := exec.Command("launchctl", "load", plistPath).Run(); err != nil {
 		return fmt.Errorf("launchctl load: %w", err)
 	}
@@ -33,6 +34,7 @@ func Uninstall() error {
 	plistPath := config.PlistPath()
 
 	_ = exec.Command("launchctl", "stop", label).Run()
+	// #nosec G204 — plistPath is an internal system path, not user input.
 	_ = exec.Command("launchctl", "unload", plistPath).Run()
 
 	_ = RemovePlist()
@@ -67,11 +69,13 @@ func IsRunning() bool {
 
 func Load() error {
 	plistPath := config.PlistPath()
+	// #nosec G204 — plistPath is an internal system path, not user input.
 	return exec.Command("launchctl", "load", plistPath).Run()
 }
 
 func Unload() error {
 	plistPath := config.PlistPath()
+	// #nosec G204 — plistPath is an internal system path, not user input.
 	return exec.Command("launchctl", "unload", plistPath).Run()
 }
 
