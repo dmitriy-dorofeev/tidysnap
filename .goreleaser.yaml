@@ -52,6 +52,7 @@ brews:
   - repository:
       owner: dmitriy-dorofeev
       name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     commit_author:
       name: goreleaserbot
       email: bot@goreleaser.com
