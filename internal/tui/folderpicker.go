@@ -20,6 +20,7 @@ type folderPickerModel struct {
 	width  int
 	height int
 	cwd    string
+	home   string
 	items  []dirItem
 	cursor int
 }
@@ -39,14 +40,15 @@ type folderSelectedMsg struct {
 type folderPickerBackMsg struct{}
 
 func newFolderPickerModel(width, height int, startDir string) folderPickerModel {
+	home, _ := os.UserHomeDir()
 	if startDir == "" {
-		home, _ := os.UserHomeDir()
 		startDir = home
 	}
 	return folderPickerModel{
-		width: width,
+		width:  width,
 		height: height,
 		cwd:    startDir,
+		home:   home,
 		items:  nil,
 		cursor: 0,
 	}
@@ -68,11 +70,11 @@ func (m folderPickerModel) load() tea.Cmd {
 		})
 
 		var items []dirItem
-		if m.cwd != "/" {
+		if m.cwd != m.home {
 			items = append(items, dirItem{name: "..", path: filepath.Dir(m.cwd), isParent: true})
 		}
 		for _, e := range entries {
-			if e.IsDir() {
+			if e.IsDir() && !strings.HasPrefix(e.Name(), ".") {
 				items = append(items, dirItem{
 					name: e.Name(),
 					path: filepath.Join(m.cwd, e.Name()),
@@ -121,7 +123,7 @@ func (m model) updateFolderPicker(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case "left", "h":
 			parent := filepath.Dir(m.folderPickerModel.cwd)
-			if parent != m.folderPickerModel.cwd {
+			if parent != m.folderPickerModel.cwd && m.folderPickerModel.cwd != m.folderPickerModel.home {
 				m.folderPickerModel.cwd = parent
 				return m, m.folderPickerModel.load()
 			}
