@@ -1,5 +1,10 @@
 # TidySnap
 
+[![GitHub Release](https://img.shields.io/github/v/release/dmitriy-dorofeev/tidysnap)](https://github.com/dmitriy-dorofeev/tidysnap/releases)
+[![CI](https://github.com/dmitriy-dorofeev/tidysnap/actions/workflows/ci.yml/badge.svg)](https://github.com/dmitriy-dorofeev/tidysnap/actions/workflows/ci.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/dmitriy-dorofeev/tidysnap)](go.mod)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A macOS utility with a TUI interface for automatic cleanup of screenshots and screen recordings.
 
 ## Quick Start
