@@ -30,6 +30,7 @@ func Prune(path string, retentionDays int) error {
 
 	cutoff := time.Now().Add(-time.Duration(retentionDays) * 24 * time.Hour)
 
+	// #nosec G304 — path is an internal log path, not user input.
 	src, err := os.Open(path)
 	if err != nil {
 		return err
@@ -37,10 +38,12 @@ func Prune(path string, retentionDays int) error {
 	defer src.Close()
 
 	tmp := path + ".tmp"
+	// #nosec G304 — tmp is derived from the internal log path, not user input.
 	dst, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, info.Mode())
 	if err != nil {
 		return err
 	}
+	defer dst.Close()
 
 	scanner := bufio.NewScanner(src)
 	for scanner.Scan() {
@@ -50,19 +53,20 @@ func Prune(path string, retentionDays int) error {
 			continue
 		}
 		if _, err := fmt.Fprintln(dst, line); err != nil {
-			dst.Close()
+			// #nosec G104 — best-effort cleanup of temporary file.
 			os.Remove(tmp)
 			return err
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		dst.Close()
+		// #nosec G104 — best-effort cleanup of temporary file.
 		os.Remove(tmp)
 		return err
 	}
 
 	if err := dst.Close(); err != nil {
+		// #nosec G104 — best-effort cleanup of temporary file.
 		os.Remove(tmp)
 		return err
 	}
