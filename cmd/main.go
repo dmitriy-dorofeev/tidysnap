@@ -13,6 +13,7 @@ import (
 	"github.com/dmitriy-dorofeev/tidysnap/internal/config"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/daemon"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/logger"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/tui"
 )
@@ -102,6 +103,10 @@ func runCleanup() error {
 
 	if err := os.MkdirAll(filepath.Dir(cfg.LogPath), 0750); err != nil {
 		return fmt.Errorf(i18n.T("err_log_dir"), err)
+	}
+
+	if err := logger.Prune(cfg.LogPath, cfg.RetentionDays); err != nil {
+		return fmt.Errorf(i18n.T("err_prune_log"), err)
 	}
 
 	logFile, err := os.OpenFile(cfg.LogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)

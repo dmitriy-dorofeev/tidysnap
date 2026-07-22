@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/cleaner"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/i18n"
+	"github.com/dmitriy-dorofeev/tidysnap/internal/logger"
 	"github.com/dmitriy-dorofeev/tidysnap/internal/scanner"
 	"github.com/dustin/go-humanize"
 )
@@ -74,6 +75,10 @@ func (m model) updatePreview(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) runCleanup() (tea.Model, tea.Cmd) {
 	return m, func() tea.Msg {
+		if err := logger.Prune(m.cfg.LogPath, m.cfg.RetentionDays); err != nil {
+			return errMsg{err}
+		}
+
 		logFile, err := os.OpenFile(m.cfg.LogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			return errMsg{err}
